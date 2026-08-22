@@ -116,4 +116,6 @@ Vibe coding accelerated the feedback loop, but changes were kept under human dir
 
 ## License
 
-No open-source license has been selected yet. Until a license is added, the repository remains available for inspection but does not grant automatic permission to reuse, modify, or redistribute the code.
+QuantaPit is released under the [MIT License](./LICENSE). You are free to use, copy, modify, merge, publish, distribute, sublicense, and sell copies of the software, provided that the copyright notice and license text are included in substantial portions of the software.
+
+The software is provided "as is", without warranty of any kind. See [`LICENSE`](./LICENSE) for the complete terms.
