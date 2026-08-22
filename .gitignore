@@ -1,0 +1,13 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.vite/
+coverage/
+local-data/
+*.local.json
+
+# Local credentials and personal project notes
+.env
+.env.*
+!.env.example
+QuantaPitVault/
