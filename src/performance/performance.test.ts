@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto'
 import { describe, expect, it } from 'vitest'
-import { consecutiveDayStreak, statisticsByGame, trendFor } from './metrics'
+import { consecutiveDayStreak, gameInsights, statisticsByGame, trendFor } from './metrics'
 import { IndexedDbPerformanceRepository, InMemoryPerformanceRepository, openPerformanceDatabase, performanceRepository } from './repository'
 import { completeSession, type SessionDraft } from './session'
 import { GAME_IDS, type CompletedSession, type GameId, type SessionItem } from './types'
@@ -59,4 +59,57 @@ describe('statistics selectors', () => {
   it('uses the last-five median and compares two windows at ten', () => { expect(trendFor(sessions(5))).toMatchObject({ state: 'baseline', current: 52 }); expect(trendFor(sessions(10))).toMatchObject({ state: 'comparison', current: 57, previous: 52, delta: 5 }) })
   it('counts consecutive calendar days once per day', () => { const values = [fixture('quick-math', 0).session, fixture('quick-math', 1).session, fixture('sequences', 1, 'duplicate-day').session, fixture('quick-math', 2).session]; expect(consecutiveDayStreak(values)).toBe(3); expect(consecutiveDayStreak([fixture('quick-math', 0).session, fixture('quick-math', 2).session])).toBe(1); expect(consecutiveDayStreak([])).toBe(0) })
   it('groups games without creating a cross-game score', () => { const result = statisticsByGame([fixture('quick-math').session, fixture('venue-gap').session]); expect(result.map(value => value.gameId)).toEqual(['quick-math', 'venue-gap']) })
+  it('keeps game history chronological, bounded and independent of repository ordering', () => {
+    const values = Array.from({ length: 12 }, (_, index) => fixture('quick-math', index).session)
+    const input = [values[8], fixture('venue-gap').session, ...values.filter((_, index) => index !== 8)]
+    const original = input.slice()
+    const result = gameInsights('quick-math', input)
+    expect(result.recent.map(row => row.session.sessionId)).toEqual(values.slice(2).reverse().map(value => value.sessionId))
+    expect(result.sessions).toBe(12)
+    expect(result.items).toBe(12)
+    expect(result.trend).toMatchObject({ state: 'comparison', current: 59, previous: 54, delta: 5 })
+    expect(input).toEqual(original)
+  })
+  it('preserves losses and zeros without substituting secondary accuracy for missing P&L', () => {
+    const values = Array.from({ length: 4 }, (_, index) => fixture('basket-edge', index).session)
+    values[0].summary = { pnl: -40, primaryScore: 100, accuracy: 90 }
+    values[1].summary = { primaryScore: 0, accuracy: 90 }
+    values[2].summary = { accuracy: 90 }
+    values[3].summary = { pnl: Number.NaN, primaryScore: Number.POSITIVE_INFINITY }
+    const result = gameInsights('basket-edge', values)
+    expect(result.recent.map(row => row.value)).toEqual([undefined, undefined, 0, -40])
+    expect(result.trend).toMatchObject({ state: 'limited', current: 0, previous: -40, sample: 2 })
+  })
+  it('uses score rather than accuracy and supports stored score-only results', () => {
+    const first = fixture('delta-shield').session
+    first.summary = { primaryScore: 72, accuracy: 100 }
+    const second = fixture('delta-shield', 1).session
+    second.summary = {}
+    second.score = 0
+    expect(gameInsights('delta-shield', [first, second]).recent.map(row => row.value)).toEqual([0, 72])
+  })
+  it('calculates completion against the planned target, not the recorded item count or elapsed time', () => {
+    const partial = fixture('quick-math').session
+    partial.plannedItemCount = 10
+    partial.completedItemCount = 3
+    partial.itemCount = 3
+    partial.summary.medianResponseTimeMs = 1200
+    const timed = fixture('foldsight').session
+    timed.plannedDurationMs = timed.actualDurationMs
+    expect(gameInsights('quick-math', [partial]).recent[0]).toMatchObject({ completionRate: 30, responseTimeMs: 1200 })
+    expect(gameInsights('foldsight', [timed]).recent[0].completionRate).toBeUndefined()
+    partial.completedItemCount = 0
+    expect(gameInsights('quick-math', [partial]).recent[0].completionRate).toBe(0)
+    partial.plannedItemCount = 0
+    expect(gameInsights('quick-math', [partial]).recent[0].completionRate).toBeUndefined()
+  })
+  it('does not turn absent or invalid measurements into zero performance', () => {
+    const value = fixture('quick-math').session
+    value.summary = { accuracy: Number.NaN, medianResponseTimeMs: -1 }
+    const result = gameInsights('quick-math', [value])
+    expect(result.recent[0].value).toBeUndefined()
+    expect(result.recent[0].responseTimeMs).toBeUndefined()
+    expect(result.trend).toEqual({ state: 'empty', sample: 0 })
+    expect(gameInsights('sequences', [value])).toMatchObject({ sessions: 0, items: 0, recent: [], trend: { state: 'empty', sample: 0 } })
+  })
 })

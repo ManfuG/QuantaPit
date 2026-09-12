@@ -22,8 +22,9 @@ It provides short practice sessions for quantitative reasoning, logic, memory, v
   - Delta Shield
 - Open-ended interview question practice
 - Local session persistence with IndexedDB
-- Per-game statistics based on completed local sessions
+- Compact per-game charts: accuracy for answer-based games, score for Magnitude Forge and Delta Shield, and P&L for trading games
 - Last-five trend medians and ten-session comparisons
+- Expandable session details with response time, completion, duration, and secondary accuracy where recorded
 - Consecutive-day activity streak
 - Responsive desktop and mobile UI
 - No account, backend, cloud storage, telemetry, or external runtime service
@@ -85,6 +86,12 @@ npm run preview
 - `/open-questions` — Interview question practice
 - `/statistics` — Local performance overview and activity streak
 - `/statistics/:gameId` — Per-game performance detail
+
+### Reading game statistics
+
+Each game detail shows its latest ten sessions, oldest to newest in the chart and newest first in the expandable history. Accuracy and score use fixed 0–100 scales; P&L includes a zero baseline and preserves losses. Games are never combined into a shared performance score.
+
+Empty or missing measurements are not estimated. A single session has no comparison; small samples are labelled as initial. Session settings may differ, so trends are descriptive rather than difficulty-adjusted. Completion is recorded items divided by the planned target, including skipped and timed-out rounds; sessions without an item target show `N/D`.
 
 ## Local data and privacy
 
