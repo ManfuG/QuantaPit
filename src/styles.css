@@ -44,6 +44,11 @@ button { cursor: pointer; border: 0; border-radius: 5px; padding: 15px 20px; col
 .storage-notice { position: fixed; right: 18px; bottom: 18px; z-index: 20; max-width: 420px; display: flex; align-items: center; gap: 14px; padding: 13px 16px; color: #fff; background: #5c3026; border: 1px solid #f39e80; border-radius: 6px; font-size: .82rem; }.storage-notice button { margin-left: auto; padding: 2px 7px; color: #fff; background: transparent; }
 .statistics-page h1 { font-size: clamp(2.8rem, 6vw, 5.4rem); }.statistics-overview, .statistics-metrics { display: flex; flex-wrap: wrap; gap: 12px; margin: 42px 0; }.statistics-overview > div, .statistics-metrics > div { min-width: 180px; flex: 1; padding: 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 7px; }.statistics-overview span, .statistics-metrics span { display: block; color: var(--muted); font-size: .76rem; margin-bottom: 10px; }.statistics-overview strong, .statistics-metrics strong { color: var(--green); font: 1.4rem 'DM Mono', monospace; }.statistics-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }.statistics-card { display: grid; gap: 8px; padding: 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 7px; }.statistics-card:hover, .statistics-card:focus-visible { border-color: var(--green); outline: none; }.statistics-card span { color: var(--green); }.statistics-card small, .statistics-empty { color: var(--muted); }.statistics-empty { margin-top: 42px; padding: 24px; background: var(--panel); border: 1px solid var(--line); border-radius: 7px; }.statistics-empty a, .statistics-back { display: inline-block; color: var(--green); margin: 10px 18px 0 0; }.statistics-page h2 { margin-top: 42px; }.statistics-history { display: grid; gap: 7px; }.statistics-history span { color: var(--muted); }.statistics-history strong { color: var(--green); }
 .statistics-detail { max-width: 980px; }
+.statistics-difficulties { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 24px; }
+.statistics-difficulties button { padding: 10px 16px; color: var(--muted); background: var(--panel); border: 1px solid var(--line); border-radius: 5px; cursor: pointer; }
+.statistics-difficulties button[aria-pressed="true"] { color: var(--green); border-color: var(--green); background: #203024; }
+.statistics-difficulties button:hover { color: var(--green); }
+.statistics-difficulties button:focus-visible { outline: 2px solid var(--green); outline-offset: 3px; }
 .statistics-detail .statistics-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 28px 0; }
 .statistics-detail .statistics-metrics > div { min-width: 0; }
 .statistics-detail .statistics-metrics strong { font-size: clamp(.95rem, 2.5vw, 1.4rem); overflow-wrap: anywhere; }
@@ -54,7 +59,10 @@ button { cursor: pointer; border: 0; border-radius: 5px; padding: 15px 20px; col
 .statistics-chart-plot { display: grid; grid-template-columns: 70px minmax(0, 1fr); }
 .statistics-chart { display: block; width: 100%; height: 180px; fill: var(--green); }
 .statistics-chart-zero { stroke: var(--muted); stroke-width: 1; }
-.statistics-chart-negative { fill: #efab92; }
+.statistics-chart-grid { stroke: var(--line); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.statistics-chart-line { fill: none; stroke: var(--green); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.statistics-chart circle { stroke: var(--green); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.statistics-chart circle.statistics-chart-negative { fill: #efab92; stroke: #efab92; }
 .statistics-chart-missing { fill: var(--muted); }
 .statistics-chart-scale { display: flex; flex-direction: column; justify-content: space-between; padding: 4px 0; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .statistics-chart-dates { display: flex; justify-content: space-between; gap: 16px; margin-left: 70px; }

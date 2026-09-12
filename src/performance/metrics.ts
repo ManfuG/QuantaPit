@@ -1,4 +1,4 @@
-import type { GameId, SessionResult } from './types'
+import type { Difficulty, GameId, SessionResult } from './types'
 import { median } from './session'
 
 export type Trend = { state: 'empty' | 'initial' | 'limited' | 'baseline' | 'comparison'; current?: number; previous?: number; delta?: number; sample: number }
@@ -74,16 +74,16 @@ function percentage(value: unknown): number | undefined {
   return number !== undefined && number >= 0 && number <= 100 ? number : undefined
 }
 
-export function gameInsights(gameId: GameId, sessions: SessionResult[]) {
+export function gameInsights(gameId: GameId, sessions: SessionResult[], difficulty?: Difficulty | 'Unspecified') {
   const metric = GAME_METRICS[gameId]
-  const selected = sessions.filter(session => session.gameId === gameId)
+  const selected = sessions.filter(session => session.gameId === gameId && (difficulty === undefined || (difficulty === 'Unspecified' ? session.difficulty === undefined : session.difficulty === difficulty)))
     .sort((a, b) => b.completedAt.localeCompare(a.completedAt))
   const valueFor = (session: SessionResult) => {
     if (metric === 'accuracy') return percentage(session.summary.accuracy)
     if (metric === 'pnl') return finite(session.summary.pnl) ?? finite(session.summary.primaryScore) ?? finite(session.score)
     return percentage(session.summary.primaryScore) ?? percentage(session.score)
   }
-  const recent: SessionInsight[] = selected.slice(0, 10).map(session => {
+  const recent: SessionInsight[] = selected.slice(0, 20).map(session => {
     const response = finite(session.summary.medianResponseTimeMs)
     const target = session.plannedItemCount
     return {

@@ -60,14 +60,14 @@ describe('statistics selectors', () => {
   it('counts consecutive calendar days once per day', () => { const values = [fixture('quick-math', 0).session, fixture('quick-math', 1).session, fixture('sequences', 1, 'duplicate-day').session, fixture('quick-math', 2).session]; expect(consecutiveDayStreak(values)).toBe(3); expect(consecutiveDayStreak([fixture('quick-math', 0).session, fixture('quick-math', 2).session])).toBe(1); expect(consecutiveDayStreak([])).toBe(0) })
   it('groups games without creating a cross-game score', () => { const result = statisticsByGame([fixture('quick-math').session, fixture('venue-gap').session]); expect(result.map(value => value.gameId)).toEqual(['quick-math', 'venue-gap']) })
   it('keeps game history chronological, bounded and independent of repository ordering', () => {
-    const values = Array.from({ length: 12 }, (_, index) => fixture('quick-math', index).session)
+    const values = Array.from({ length: 22 }, (_, index) => fixture('quick-math', index).session)
     const input = [values[8], fixture('venue-gap').session, ...values.filter((_, index) => index !== 8)]
     const original = input.slice()
     const result = gameInsights('quick-math', input)
     expect(result.recent.map(row => row.session.sessionId)).toEqual(values.slice(2).reverse().map(value => value.sessionId))
-    expect(result.sessions).toBe(12)
-    expect(result.items).toBe(12)
-    expect(result.trend).toMatchObject({ state: 'comparison', current: 59, previous: 54, delta: 5 })
+    expect(result.sessions).toBe(22)
+    expect(result.items).toBe(22)
+    expect(result.trend).toMatchObject({ state: 'comparison', current: 69, previous: 64, delta: 5 })
     expect(input).toEqual(original)
   })
   it('preserves losses and zeros without substituting secondary accuracy for missing P&L', () => {
@@ -111,5 +111,17 @@ describe('statistics selectors', () => {
     expect(result.recent[0].responseTimeMs).toBeUndefined()
     expect(result.trend).toEqual({ state: 'empty', sample: 0 })
     expect(gameInsights('sequences', [value])).toMatchObject({ sessions: 0, items: 0, recent: [], trend: { state: 'empty', sample: 0 } })
+  })
+  it('filters difficulty before taking the twenty-session window and calculating trends', () => {
+    const easy = Array.from({ length: 22 }, (_, index) => ({ ...fixture('quick-math', index).session, difficulty: 'Easy' as const }))
+    const hard = Array.from({ length: 25 }, (_, index) => ({ ...fixture('quick-math', index, `hard-${index}`).session, difficulty: 'Hard' as const, summary: { accuracy: 0 } }))
+    const legacy = fixture('quick-math', 30).session
+    const input = [...hard, ...easy, legacy]
+    const result = gameInsights('quick-math', input, 'Easy')
+    expect(result.recent.map(row => row.value)).toEqual(easy.slice(2).reverse().map(session => session.summary.accuracy))
+    expect(result.trend).toMatchObject({ current: 69, previous: 64, delta: 5 })
+    expect(result.sessions).toBe(22)
+    expect(gameInsights('quick-math', input, 'Medium').recent).toEqual([])
+    expect(gameInsights('quick-math', input, 'Unspecified').recent.map(row => row.session.sessionId)).toEqual([legacy.sessionId])
   })
 })

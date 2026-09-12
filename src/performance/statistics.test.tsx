@@ -11,7 +11,7 @@ import { Statistics } from '../App'
 
 function session(index: number, gameId: SessionResult['gameId'] = 'quick-math', metric = index + 1): SessionResult {
   const date = new Date(Date.UTC(2025, 0, index + 1)).toISOString()
-  return { schemaVersion: 1, sessionId: `${gameId}-${index}`, gameId, startedAt: date, completedAt: date, status: 'completed', terminationReason: 'rounds-completed', config: {}, actualDurationMs: 1000, completedItemCount: 1, itemCount: 1, summary: { accuracy: metric, primaryScore: metric, correctCount: metric > 50 ? 1 : 0, answeredCount: 1 } }
+  return { schemaVersion: 1, sessionId: `${gameId}-${index}`, gameId, startedAt: date, completedAt: date, status: 'completed', terminationReason: 'rounds-completed', config: {}, difficulty: gameId === 'foldsight' || gameId === 'magnitude-forge' ? undefined : 'Medium', actualDurationMs: 1000, completedItemCount: 1, itemCount: 1, summary: { accuracy: metric, primaryScore: metric, correctCount: metric > 50 ? 1 : 0, answeredCount: 1 } }
 }
 
 let container: HTMLDivElement
@@ -54,20 +54,21 @@ describe('Statistics UI', () => {
     await render(`/statistics/${gameId}`)
     const metric = ['hidden-spread', 'basket-edge', 'venue-gap'].includes(gameId) ? 'P&L' : ['magnitude-forge', 'delta-shield'].includes(gameId) ? 'Score' : 'Accuracy'
     const chart = container.querySelector('[role="img"]')
-    expect(chart?.getAttribute('aria-label')).toContain(`${GAME_NAMES[gameId]} ${metric}`)
+    expect(chart?.getAttribute('aria-label')).toContain(GAME_NAMES[gameId])
+    expect(chart?.getAttribute('aria-label')).toContain(metric)
     expect(chart?.getAttribute('aria-label')).toContain(metric === 'P&L' ? '50.0 units' : metric === 'Score' ? '50.0 / 100' : '50.0%')
     expect(container.querySelector('.statistics-chart-note')?.textContent).toContain('No comparison')
     expect(container.querySelector('details')?.open).toBe(false)
   })
   it('orders and limits visible sessions without mixing games or losing all-time counts', async () => {
-    state.sessions = [...Array.from({ length: 12 }, (_, index) => session(index, 'quick-math', index * 5)), session(20, 'venue-gap', 99)]
+    state.sessions = [...Array.from({ length: 22 }, (_, index) => session(index, 'quick-math', index * 4)), session(25, 'venue-gap', 99)]
     await render('/statistics/quick-math')
     const label = container.querySelector('[role="img"]')!.getAttribute('aria-label')!
-    expect(label.indexOf('10.0%')).toBeLessThan(label.indexOf('55.0%'))
+    expect(label.indexOf('8.0%')).toBeLessThan(label.indexOf('84.0%'))
     expect(label).not.toContain('99.0')
-    expect(container.querySelectorAll('details')).toHaveLength(10)
-    expect(container.querySelector('summary strong')?.textContent).toBe('55.0%')
-    expect(container.querySelector('.statistics-metrics strong')?.textContent).toBe('12')
+    expect(container.querySelectorAll('details')).toHaveLength(20)
+    expect(container.querySelector('summary strong')?.textContent).toBe('84.0%')
+    expect(container.querySelector('.statistics-metrics strong')?.textContent).toBe('22')
     expect(container.textContent).not.toContain('Venue Gap')
   })
   it('makes session insights available on expansion, including partial completion', async () => {
@@ -109,5 +110,48 @@ describe('Statistics UI', () => {
     state.sessions = Array.from({ length: 10 }, (_, index) => ({ ...session(index, 'venue-gap'), summary: { pnl: index * 10, accuracy: 100 - index } }))
     await render('/statistics/venue-gap')
     expect(container.querySelector('figcaption')?.textContent).toContain('50.0 vs previous 5')
+  })
+  it('switches chart, history and summary together without mixing difficulties', async () => {
+    state.sessions = [
+      { ...session(0, 'quick-math', 20), difficulty: 'Easy' },
+      { ...session(1, 'quick-math', 90), difficulty: 'Hard' },
+    ]
+    await render('/statistics/quick-math')
+    expect(container.querySelector('button[aria-pressed="true"]')?.textContent).toBe('Hard')
+    const buttons = [...container.querySelectorAll<HTMLButtonElement>('.statistics-difficulties button')]
+    await act(async () => buttons.find(button => button.textContent === 'Easy')!.click())
+    expect(container.querySelector('[role="img"]')?.getAttribute('aria-label')).toContain('20.0%')
+    expect(container.querySelector('[role="img"]')?.getAttribute('aria-label')).not.toContain('90.0%')
+    expect(container.querySelector('summary strong')?.textContent).toBe('20.0%')
+    await act(async () => buttons.find(button => button.textContent === 'Medium')!.click())
+    expect(container.querySelector('[role="img"]')).toBeNull()
+    expect(container.querySelector('details')).toBeNull()
+    expect(container.querySelector('.statistics-empty')?.textContent).toContain('medium')
+    await act(async () => buttons.find(button => button.textContent === 'Hard')!.click())
+    expect(container.querySelector('summary strong')?.textContent).toBe('90.0%')
+  })
+  it('keeps legacy sessions accessible without assigning them a difficulty', async () => {
+    state.sessions = [{ ...session(0), difficulty: undefined }, session(1)]
+    await render('/statistics/quick-math')
+    const button = [...container.querySelectorAll<HTMLButtonElement>('button')].find(button => button.textContent === 'Unspecified')!
+    await act(async () => button.click())
+    expect(container.querySelector('summary strong')?.textContent).toBe('1.0%')
+    expect(container.querySelectorAll('details')).toHaveLength(1)
+  })
+  it.each(['foldsight', 'magnitude-forge'] as const)('does not invent difficulty levels for %s', async gameId => {
+    state.sessions = [session(0, gameId)]
+    await render(`/statistics/${gameId}`)
+    expect(container.querySelector('[aria-label="Session difficulty"]')).toBeNull()
+    expect(container.querySelector('[role="img"]')?.getAttribute('aria-label')).toContain(GAME_NAMES[gameId])
+  })
+  it('leaves a visible gap rather than connecting across missing measurements', async () => {
+    const missing = session(1)
+    missing.summary = {}
+    state.sessions = [session(0, 'quick-math', 10), missing, session(2, 'quick-math', 90), session(3, 'quick-math', 70)]
+    await render('/statistics/quick-math')
+    const path = container.querySelector('.statistics-chart-line')!.getAttribute('d')!
+    expect(path.match(/M/g)).toHaveLength(2)
+    expect(path.match(/L/g)).toHaveLength(1)
+    expect(container.querySelectorAll('.statistics-chart circle')).toHaveLength(3)
   })
 })

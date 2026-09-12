@@ -89,9 +89,9 @@ npm run preview
 
 ### Reading game statistics
 
-Each game detail shows its latest ten sessions, oldest to newest in the chart and newest first in the expandable history. Accuracy and score use fixed 0–100 scales; P&L includes a zero baseline and preserves losses. Games are never combined into a shared performance score.
+Use the Easy, Medium, and Hard buttons to switch between difficulty-specific charts, summaries, and history. Each view shows its latest twenty sessions: connected points run oldest to newest, while expandable history runs newest first. The latest session's difficulty is selected initially. FoldSight and Magnitude Forge have no difficulty levels and keep a single view; legacy sessions without a difficulty remain accessible under Unspecified.
 
-Empty or missing measurements are not estimated. A single session has no comparison; small samples are labelled as initial. Session settings may differ, so trends are descriptive rather than difficulty-adjusted. Completion is recorded items divided by the planned target, including skipped and timed-out rounds; sessions without an item target show `N/D`.
+Accuracy and score use fixed 0–100 scales; P&L includes a zero baseline and preserves losses. Missing measurements leave gaps in the line rather than estimated values. A single session has no comparison; small samples are labelled as initial. Trends retain their last-five median windows and never combine games or difficulty levels in game detail. Completion is recorded items divided by the planned target, including skipped and timed-out rounds; sessions without an item target show `N/D`.
 
 ## Local data and privacy
 

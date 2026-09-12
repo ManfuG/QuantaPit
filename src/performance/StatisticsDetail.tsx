@@ -1,7 +1,7 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { gameInsights, type PerformanceMetric, type SessionInsight, type Trend } from './metrics'
-import { GAME_NAMES, type GameId, type SessionResult } from './types'
+import { GAME_NAMES, type Difficulty, type GameId, type SessionResult } from './types'
 
 const METRIC_LABELS: Record<PerformanceMetric, string> = { accuracy: 'Accuracy', score: 'Score', pnl: 'P&L' }
 
@@ -25,39 +25,50 @@ function PerformanceChart({ recent, metric, name }: { recent: SessionInsight[]; 
   const min = metric === 'pnl' ? Math.min(0, ...values) : 0
   const max = metric === 'pnl' ? Math.max(0, ...values) || (min < 0 ? 0 : 1) : 100
   const y = (value: number) => 12 + (max - value) / (max - min) * 156
-  const zero = y(0)
-  const step = 560 / points.length
+  const ticks = Array.from({ length: 5 }, (_, index) => max - (max - min) * index / 4)
+  const x = (index: number) => points.length === 1 ? 300 : 20 + index / (points.length - 1) * 560
+  const line = points.map((point, index) => point.value === undefined ? '' : `${index === 0 || points[index - 1].value === undefined ? 'M' : 'L'}${x(index)},${y(point.value)}`).join(' ')
   const description = points.map(point => `${new Date(point.session.completedAt).toLocaleDateString()}: ${metricText(point.value, metric)}`).join('; ')
   return <>
     <div className="statistics-chart-plot">
-    <div className="statistics-chart-scale"><span>{metricText(max, metric)}</span><span>{metricText(min, metric)}</span></div>
+    <div className="statistics-chart-scale">{ticks.map(value => <span key={value}>{metricText(value, metric)}</span>)}</div>
     <svg className="statistics-chart" viewBox="0 0 600 180" preserveAspectRatio="none" role="img" aria-label={`${name} ${METRIC_LABELS[metric]}, oldest to newest. ${description}`}>
-      <line x1="20" x2="580" y1={zero} y2={zero} className="statistics-chart-zero" />
+      {ticks.map(value => <line key={value} x1="20" x2="580" y1={y(value)} y2={y(value)} className="statistics-chart-grid" />)}
+      {[0, 1, 2, 3, 4].map(index => <line key={index} x1={20 + index * 140} x2={20 + index * 140} y1="12" y2="168" className="statistics-chart-grid" />)}
+      <line x1="20" x2="580" y1={y(0)} y2={y(0)} className="statistics-chart-zero" />
+      <path d={line} className="statistics-chart-line" />
       {points.map((point, index) => {
-        const x = 20 + step * (index + 0.5)
-        if (point.value === undefined) return <text key={point.session.sessionId} x={x} y="96" textAnchor="middle" className="statistics-chart-missing">—</text>
-        const top = y(point.value)
+        if (point.value === undefined) return <text key={point.session.sessionId} x={x(index)} y="96" textAnchor="middle" className="statistics-chart-missing">—</text>
         return <g key={point.session.sessionId}>
           <title>{new Date(point.session.completedAt).toLocaleString()} · {metricText(point.value, metric)}</title>
-          {point.value === 0 ? <circle cx={x} cy={zero} r="4" /> : <rect x={x - Math.min(18, step / 4)} y={Math.min(top, zero)} width={Math.min(36, step / 2)} height={Math.max(1, Math.abs(zero - top))} rx="3" className={point.value < 0 ? 'statistics-chart-negative' : undefined} />}
+          <circle cx={x(index)} cy={y(point.value)} r="3" className={point.value < 0 ? 'statistics-chart-negative' : undefined} />
         </g>
       })}
     </svg>
     </div>
     <div className="statistics-chart-dates"><span>{new Date(points[0].session.completedAt).toLocaleDateString()}</span>{points.length > 1 && <span>{new Date(points[points.length - 1].session.completedAt).toLocaleDateString()}</span>}</div>
-    <p className="statistics-chart-note">{points.length === 1 ? 'One session. No comparison yet.' : 'Oldest to newest · Session settings may differ.'}{values.length < points.length && ' — Not recorded.'}</p>
+    {(points.length === 1 || values.length < points.length) && <p className="statistics-chart-note">{points.length === 1 && 'One session. No comparison yet.'}{values.length < points.length && ' — Not recorded.'}</p>}
   </>
 }
 
 export function StatisticsDetail({ gameId, sessions }: { gameId: GameId; sessions: SessionResult[] }) {
-  const insights = useMemo(() => gameInsights(gameId, sessions), [gameId, sessions])
+  const fixed = gameId === 'foldsight' || gameId === 'magnitude-forge'
+  const gameSessions = useMemo(() => sessions.filter(session => session.gameId === gameId), [gameId, sessions])
+  const [difficulty, setDifficulty] = useState<Difficulty | 'Unspecified'>(() => {
+    const latest = gameSessions.reduce<SessionResult | undefined>((current, session) => !current || session.completedAt > current.completedAt ? session : current, undefined)
+    return latest ? latest.difficulty ?? 'Unspecified' : 'Easy'
+  })
+  const difficulties: (Difficulty | 'Unspecified')[] = ['Easy', 'Medium', 'Hard']
+  if (gameSessions.some(session => session.difficulty === undefined)) difficulties.push('Unspecified')
+  const insights = useMemo(() => gameInsights(gameId, gameSessions, fixed ? undefined : difficulty), [gameId, gameSessions, fixed, difficulty])
   const { recent, metric } = insights
   const name = GAME_NAMES[gameId]
   const market = ['hidden-spread', 'basket-edge', 'venue-gap', 'delta-shield'].includes(gameId)
   return <section className="page statistics-page statistics-detail">
     <p className="eyebrow">STATISTICS / GAME DETAIL</p><h1>{name}</h1>
     <NavLink className="statistics-back" to="/statistics">← Overview</NavLink>
-    {!recent.length ? <div className="statistics-empty"><p>No completed sessions yet.</p><NavLink to={`/${market ? 'market-games' : 'logic-and-math-games'}/${gameId}`}>Play {name}</NavLink></div> : <>
+    {!fixed && <div className="statistics-difficulties" role="group" aria-label="Session difficulty">{difficulties.map(value => <button key={value} type="button" aria-pressed={difficulty === value} onClick={() => setDifficulty(value)}>{value}</button>)}</div>}
+    {!recent.length ? <div className="statistics-empty"><p>{fixed ? 'No completed sessions yet.' : `No ${difficulty.toLowerCase()} sessions yet.`}</p><NavLink to={`/${market ? 'market-games' : 'logic-and-math-games'}/${gameId}`}>Play {name}</NavLink></div> : <>
       <div className="statistics-metrics">
         <div><span>Sessions</span><strong>{insights.sessions}</strong></div>
         <div><span>Items / rounds</span><strong>{insights.items}</strong></div>
@@ -65,7 +76,7 @@ export function StatisticsDetail({ gameId, sessions }: { gameId: GameId; session
       </div>
       <figure className="statistics-figure">
         <figcaption><h2>{METRIC_LABELS[metric]} by session</h2><span>Last {recent.length} · <TrendLabel trend={insights.trend} /></span></figcaption>
-        <PerformanceChart recent={recent} metric={metric} name={name} />
+        <PerformanceChart recent={recent} metric={metric} name={fixed ? name : `${name} ${difficulty}`} />
       </figure>
       <h2>Recent sessions</h2>
       <div className="statistics-history">
