@@ -90,12 +90,12 @@ npm run preview
 
 ### Configuring practice
 
-Presets remain available alongside custom inputs, and starting without changes preserves the original quick sessions.
+Presets remain available alongside custom inputs, with aligned fields on desktop and stacked controls on mobile. FoldSight's question target is directly editable without an extra toggle.
 
 | Games | Custom settings | Default |
 | --- | --- | --- |
 | Quick Math, Sequences, Radix Rush, Tape Recall | Duration in minutes (fractions allowed), positive whole-number question target | 1 minute, 10 questions, Medium |
-| FoldSight | Duration and optional question target | 1 minute, no question limit |
+| FoldSight | Duration in minutes (fractions allowed), positive whole-number question target | 1 minute, 10 questions |
 | Magnitude Forge | Distinct questions up to the available bank, whole seconds per question | 5 questions, 60 seconds each |
 | Basket Edge, Venue Gap, Delta Shield | Positive whole-number rounds and seconds per round | 5 rounds, 60 seconds each, Easy |
 | Hidden Spread | Positive whole-number rounds, seconds to trade, seconds to quote | 5 rounds, 60 seconds to trade, 30 to quote, Easy |

@@ -125,7 +125,6 @@ describe('configuration rejects invalid sessions before creating an attempt', ()
 
   it.each(setups)('$path refuses invalid count and time without leaving setup', async ({ path, count, time, fractionalTime }) => {
     await render(path)
-    if (path.endsWith('foldsight')) await act(async () => input('Limit questions').click())
     for (const value of ['', '0', '1.5', '9007199254740992']) {
       await fill(count, value)
       await click('.start-button')
@@ -213,11 +212,10 @@ describe('timed drill limits', () => {
   })
 })
 
-describe('FoldSight optional question limit', () => {
+describe('FoldSight question and time limits', () => {
   it('ends after the selected answer count without generating another question', async () => {
     await render(logicPath('foldsight'))
     await fill('Custom Duration (min)', '0.5')
-    await act(async () => input('Limit questions').click())
     await fill('Custom Questions', '2')
     await click('.start-button')
     await click('.cube-option')
@@ -231,22 +229,18 @@ describe('FoldSight optional question limit', () => {
     expect(items).toHaveLength(2)
     expect(element('.score-line').textContent).toMatch(/Total\s*2/)
     await click('.actions button')
-    expect(input('Limit questions').checked).toBe(true)
-    await act(async () => input('Limit questions').click())
     await fill('Custom Duration (min)', '0.02')
     await click('.start-button')
     await tick(1200)
     await act(async () => { await Promise.all(completion.mock.results.map(result => result.value)) })
     const sessions = await repository.getCompletedSessions()
-    const timerOnly = sessions.find(value => value.terminationReason === 'time-limit')!
-    expect(timerOnly.plannedItemCount).toBeUndefined()
-    expect(timerOnly.config.questions).toBeUndefined()
+    const timedSession = sessions.find(value => value.terminationReason === 'time-limit')!
+    expect(timedSession).toMatchObject({ plannedItemCount: 2, config: { questions: 2 }, actualDurationMs: 1200, completedItemCount: 0 })
   })
 
   it('lets time win over an unfinished answer target, including active feedback', async () => {
     await render(logicPath('foldsight'))
     await fill('Custom Duration (min)', '0.02')
-    await act(async () => input('Limit questions').click())
     await fill('Custom Questions', '3')
     await click('.start-button')
     await tick(1000)
@@ -257,17 +251,6 @@ describe('FoldSight optional question limit', () => {
     expect(session).toMatchObject({ plannedDurationMs: 1200, plannedItemCount: 3, actualDurationMs: 1200, completedItemCount: 1, terminationReason: 'time-limit' })
   })
 
-  it('defaults to timer-only play and continues after answers until one minute', async () => {
-    await render(logicPath('foldsight'))
-    await click('.start-button')
-    await click('.cube-option')
-    await tick(700)
-    expect(element<HTMLButtonElement>('.cube-option').disabled).toBe(false)
-    await tick(59300)
-    const { session } = await saved('foldsight')
-    expect(session).toMatchObject({ plannedDurationMs: 60000, actualDurationMs: 60000, completedItemCount: 1, terminationReason: 'time-limit' })
-    expect(session.plannedItemCount).toBeUndefined()
-  })
 })
 
 describe('Magnitude Forge bank and per-question limits', () => {
