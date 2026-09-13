@@ -1,4 +1,6 @@
 import { GAME_IDS, type CompletedSession, type GameId, type SessionItem, type SessionResult } from './types'
+import { roundConfigError, sessionConfigError } from '../gameConfig'
+import { MAGNITUDE_QUESTIONS } from '../magnitudeForge'
 
 const TERMINATIONS = ['completed', 'time-limit', 'user-finished', 'rounds-completed']
 const DIFFICULTIES = ['Easy', 'Medium', 'Hard']
@@ -33,17 +35,37 @@ function validateGameConfiguration(session: SessionResult): void {
   if (!Object.keys(session.config).length) return
   const difficultyGames: GameId[] = ['quick-math', 'sequences', 'radix-rush', 'tape-recall', 'hidden-spread', 'basket-edge', 'venue-gap', 'delta-shield']
   if (difficultyGames.includes(session.gameId)) assert(session.difficulty !== undefined, `${session.gameId} difficulty is required`)
-  if (['quick-math', 'sequences', 'radix-rush', 'tape-recall'].includes(session.gameId)) {
-    assert([1, 5, 8].includes(numberField(session.config.duration, 'duration')), 'unsupported timed duration')
-    assert([10, 50, 80].includes(numberField(session.config.questions, 'questions')), 'unsupported question count')
-  } else if (session.gameId === 'foldsight') assert([1, 5, 8].includes(numberField(session.config.duration, 'duration')), 'unsupported FoldSight duration')
-  else if (session.gameId === 'magnitude-forge') {
-    assert(numberField(session.config.questions, 'questions') === 5 && numberField(session.config.secondsPerQuestion, 'secondsPerQuestion') === 60, 'unsupported Magnitude Forge config')
-    assert(session.itemCount === 5 && session.completedItemCount === 5, 'Magnitude Forge requires five terminal items')
+  const config = session.config
+  let target: number | undefined
+  let plannedDuration: number | undefined
+  if (['quick-math', 'sequences', 'radix-rush', 'tape-recall', 'foldsight'].includes(session.gameId)) {
+    const duration = numberField(config.duration, 'duration')
+    target = session.gameId === 'foldsight' && config.questions === undefined ? undefined : numberField(config.questions, 'questions')
+    const error = sessionConfigError(duration, target)
+    assert(!error, error)
+    plannedDuration = duration * 60_000
+    if (target !== undefined) assert(session.itemCount <= target, 'items exceed configured question target')
+  } else if (session.gameId === 'magnitude-forge') {
+    target = numberField(config.questions, 'questions')
+    const seconds = numberField(config.secondsPerQuestion, 'secondsPerQuestion')
+    const error = roundConfigError(target, seconds, MAGNITUDE_QUESTIONS.length)
+    assert(!error, error)
+    plannedDuration = target * seconds * 1000
+    assert(session.itemCount === target && session.completedItemCount === target, 'Magnitude Forge requires the configured terminal item count')
   } else {
-    assert(numberField(session.config.rounds, 'rounds') === 5, 'market sessions require five rounds')
-    assert(session.itemCount === 5 && session.completedItemCount === 5, 'market sessions require five terminal items')
+    target = numberField(config.rounds, 'rounds')
+    // Existing market records omitted clocks; their original five-round defaults remain readable.
+    const originalClocks = config.secondsPerRound === undefined && config.traderSeconds === undefined && config.marketMakerSeconds === undefined && target === 5
+    const hidden = session.gameId === 'hidden-spread'
+    const seconds = originalClocks ? 60 : numberField(hidden ? config.traderSeconds : config.secondsPerRound, 'round seconds')
+    const quoteSeconds = hidden ? originalClocks ? 30 : numberField(config.marketMakerSeconds, 'quote seconds') : undefined
+    const error = roundConfigError(target, seconds, Number.MAX_SAFE_INTEGER, quoteSeconds)
+    assert(!error, error)
+    if (!hidden) plannedDuration = target * seconds * 1000
+    assert(session.itemCount === target && session.completedItemCount === target, 'market sessions require the configured terminal item count')
   }
+  if (session.plannedItemCount !== undefined) assert(session.plannedItemCount === target, 'planned item count differs from configuration')
+  if (session.plannedDurationMs !== undefined && plannedDuration !== undefined) assert(session.plannedDurationMs === plannedDuration, 'planned duration differs from configuration')
 }
 
 export function validateSession(session: SessionResult): void {

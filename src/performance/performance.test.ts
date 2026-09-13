@@ -26,7 +26,23 @@ describe('performance schema', () => {
   it('accepts representative granular data for all ten games', () => { GAME_IDS.forEach(gameId => expect(() => validateCompletedSession(fixture(gameId))).not.toThrow()) })
   it('normalizes a legacy additive fixture without losing fields', () => { const current = fixture('sequences').session; const legacy = { ...current, schemaVersion: 0, itemCount: undefined }; const normalized = normalizeSession(legacy); expect(normalized).toMatchObject({ schemaVersion: 1, sessionId: current.sessionId, completedItemCount: 1, itemCount: 1 }) })
   it('rejects malformed game-specific payloads and enums', () => { const value = fixture('delta-shield'); value.items[0].payload = { responseTimeMs: 1 } as never; expect(() => validateCompletedSession(value)).toThrow('payload'); const status = fixture('quick-math'); status.items[0].status = 'unknown' as never; expect(() => validateCompletedSession(status)).toThrow('status') })
-  it('rejects semantic range and current configuration defects', () => { const accuracy = fixture('quick-math'); accuracy.session.summary.accuracy = 101; expect(() => validateCompletedSession(accuracy)).toThrow('accuracy'); const config = fixture('quick-math'); config.session.config = { duration: 2, questions: 10, difficulty: 'Easy' }; config.session.difficulty = 'Easy'; expect(() => validateCompletedSession(config)).toThrow('duration'); const market = fixture('basket-edge'); market.session.config = { rounds: 5 }; market.session.difficulty = 'Easy'; expect(() => validateCompletedSession(market)).toThrow('five terminal') })
+  it('rejects semantic ranges and incomplete configured markets', () => {
+    const accuracy = fixture('quick-math'); accuracy.session.summary.accuracy = 101
+    expect(() => validateCompletedSession(accuracy)).toThrow('accuracy')
+    const market = fixture('basket-edge'); market.session.config = { rounds: 5 }; market.session.difficulty = 'Easy'
+    expect(() => validateCompletedSession(market)).toThrow('terminal item count')
+  })
+  it('rejects invalid imported settings and contradictory planned metadata', () => {
+    const value = fixture('quick-math')
+    value.session.difficulty = 'Easy'
+    value.session.config = { duration: 2.5, questions: 2 }
+    for (const config of [{ duration: 0, questions: 2 }, { duration: 2.5, questions: 1.5 }]) {
+      expect(() => validateCompletedSession({ ...value, session: { ...value.session, config } })).toThrow()
+    }
+    for (const plan of [{ plannedDurationMs: 60000 }, { plannedItemCount: 3 }]) {
+      expect(() => validateCompletedSession({ ...value, session: { ...value.session, ...plan } })).toThrow('differs from configuration')
+    }
+  })
   it.each([
     ['NaN', (value: CompletedSession) => { value.session.actualDurationMs = Number.NaN }],
     ['negative duration', (value: CompletedSession) => { value.session.actualDurationMs = -1 }],

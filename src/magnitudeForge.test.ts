@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   averageFiveScores,
   averageScores,
-  chooseFiveQuestions,
+  chooseMagnitudeQuestions,
   MAGNITUDE_QUESTIONS,
   parsePositiveInput,
   scoreQuestion,
@@ -67,9 +67,16 @@ describe('MagnitudeForge inputs and scoring', () => {
 
 describe('MagnitudeForge selection', () => {
   it('chooses five distinct questions', () => {
-    const selected = chooseFiveQuestions(() => 0.25)
+    const selected = chooseMagnitudeQuestions(5, () => 0.25)
     expect(selected).toHaveLength(5)
     expect(new Set(selected.map(question => question.id)).size).toBe(5)
     expect(selected.every(question => MAGNITUDE_QUESTIONS.includes(question))).toBe(true)
+  })
+  it('supports the entire bank without repeats and rejects invalid counts', () => {
+    const selected = chooseMagnitudeQuestions(MAGNITUDE_QUESTIONS.length, () => 0.25)
+    expect(new Set(selected.map(question => question.id))).toEqual(new Set(MAGNITUDE_QUESTIONS.map(question => question.id)))
+    for (const count of [0, -1, 1.5, NaN, Infinity, MAGNITUDE_QUESTIONS.length + 1]) {
+      expect(() => chooseMagnitudeQuestions(count)).toThrow(RangeError)
+    }
   })
 })

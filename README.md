@@ -27,6 +27,7 @@ It provides short practice sessions for quantitative reasoning, logic, memory, v
 - Expandable session details with response time, completion, duration, and secondary accuracy where recorded
 - Consecutive-day activity streak
 - Responsive desktop and mobile UI
+- Custom session durations, question targets, and round clocks with validated game-specific limits
 - No account, backend, cloud storage, telemetry, or external runtime service
 
 ## Technology
@@ -86,6 +87,24 @@ npm run preview
 - `/open-questions` — Interview question practice
 - `/statistics` — Local performance overview and activity streak
 - `/statistics/:gameId` — Per-game performance detail
+
+### Configuring practice
+
+Presets remain available alongside custom inputs, and starting without changes preserves the original quick sessions.
+
+| Games | Custom settings | Default |
+| --- | --- | --- |
+| Quick Math, Sequences, Radix Rush, Tape Recall | Duration in minutes (fractions allowed), positive whole-number question target | 1 minute, 10 questions, Medium |
+| FoldSight | Duration and optional question target | 1 minute, no question limit |
+| Magnitude Forge | Distinct questions up to the available bank, whole seconds per question | 5 questions, 60 seconds each |
+| Basket Edge, Venue Gap, Delta Shield | Positive whole-number rounds and seconds per round | 5 rounds, 60 seconds each, Easy |
+| Hidden Spread | Positive whole-number rounds, seconds to trade, seconds to quote | 5 rounds, 60 seconds to trade, 30 to quote, Easy |
+
+Timed drills stop at the first limit reached; Tape Recall includes memorization in the session clock. Durations must be at least one second (`0.5` minutes means 30 seconds). Per-question and per-round clocks reset for each item. Hidden Spread repeats its shuffled five-player quoting order every five rounds, so shorter sessions can omit some roles. Generated drills create questions as needed rather than allocating the entire target at startup.
+
+Counts and clocks must stay within JavaScript's safe numeric range; round-count/time combinations that exceed safe total milliseconds are rejected. Invalid inputs show the field and allowed range without starting an attempt. Results show the selected configuration; local records retain planned targets, clocks, and actual completion. Existing session records remain readable.
+
+Interview question practice remains untimed, with its existing count bounded by the selected category/difficulty bank.
 
 ### Reading game statistics
 

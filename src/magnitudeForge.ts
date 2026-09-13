@@ -131,16 +131,16 @@ export const MAGNITUDE_QUESTIONS: readonly MagnitudeQuestion[] = [...CORE_MAGNIT
 /** Backwards-friendly name for consumers that call this a question bank. */
 export const QUESTION_BANK = MAGNITUDE_QUESTIONS
 
-export function chooseFiveQuestions(random: () => number = Math.random): MagnitudeQuestion[] {
+export function chooseMagnitudeQuestions(count = 5, random: () => number = Math.random): MagnitudeQuestion[] {
+  if (!Number.isInteger(count) || count < 1 || count > MAGNITUDE_QUESTIONS.length) throw new RangeError(`Choose between 1 and ${MAGNITUDE_QUESTIONS.length} questions.`)
   const shuffled = [...MAGNITUDE_QUESTIONS]
   for (let index = shuffled.length - 1; index > 0; index -= 1) {
     const randomIndex = Math.min(index, Math.max(0, Math.floor(random() * (index + 1))))
     ;[shuffled[index], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[index]]
   }
-  return shuffled.slice(0, 5)
+  return shuffled.slice(0, count)
 }
 
-export const chooseFiveDistinctQuestions = chooseFiveQuestions
 
 export type NumberInput = string | number
 
