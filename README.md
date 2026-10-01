@@ -45,12 +45,14 @@ It provides short practice sessions for quantitative reasoning, logic, memory, v
 
 ### Requirements
 
-Use a recent version of Node.js and npm.
+Use **Node.js 24 LTS, version 24.15.0 or newer**, with npm. The locked dependencies also support Node.js 22.22.2+ on the 22.x line, or Node.js 26+. Older Node.js versions do not satisfy the test environment's requirements.
+
+The `.nvmrc` file selects Node.js 24. If you use [nvm](https://github.com/nvm-sh/nvm#installing-and-updating), run `nvm install` and `nvm use` from the repository root before installing dependencies.
 
 ### Install dependencies
 
 ```bash
-npm install
+npm ci
 ```
 
 ### Start the development server
@@ -60,6 +62,30 @@ npm run dev
 ```
 
 Open the local URL printed by Vite, usually `http://localhost:5173`.
+
+### Ubuntu / Linux
+
+QuantaPit runs as a local web application, not a native desktop executable. It needs Node.js/npm for the server and a modern browser with IndexedDB enabled; no backend service or OS-specific setup is required.
+
+With Node.js 24 LTS and npm installed, run from the repository root:
+
+```bash
+node --version
+npm --version
+npm ci
+npm run dev
+```
+
+Open the URL printed by Vite in Firefox, usually `http://localhost:5173`. Keep the terminal running; press `Ctrl+C` to stop the server. Do not open `index.html` directly using `file://`, and do not run npm with `sudo`.
+
+Compatibility was verified for [issue #10](https://github.com/ManfuG/QuantaPit/issues/10) on **Ubuntu 26.04.1 LTS x64**, with **Node.js 24.21.0**, **npm 11.19.0**, and **Firefox 156.0.1**:
+
+- Clean dependency installation using `npm ci`.
+- The full Vitest suite and the TypeScript/Vite production build.
+- The development server and production preview in Firefox, including client-side navigation.
+- A completed Quick Math session, IndexedDB persistence, and statistics still visible after reloading.
+
+No Linux-specific application defect was found in these checks. Other Linux distributions, architectures, and browsers were not exercised in this verification.
 
 ### Run tests
 
