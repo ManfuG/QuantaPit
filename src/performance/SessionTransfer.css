@@ -1,0 +1,118 @@
+.session-transfer {
+  margin: 28px 0;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--panel);
+}
+
+.session-transfer h2 {
+  margin: 0 0 12px;
+  font-size: 1.15rem;
+}
+
+.session-transfer-help {
+  margin: 0 0 20px;
+  color: var(--muted);
+  font-size: .9rem;
+  line-height: 1.6;
+}
+
+.session-transfer-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 20px;
+}
+
+.session-transfer-controls > button {
+  flex-shrink: 0;
+}
+
+.session-transfer-file {
+  flex: 1 1 260px;
+  min-width: 0;
+}
+
+.session-transfer-file label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: .9rem;
+  font-weight: 600;
+}
+
+.session-transfer-file input {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding: 8px;
+  color: inherit;
+  background: #101512;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  font-size: .85rem;
+}
+
+.session-transfer-file input::file-selector-button {
+  margin-right: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  color: inherit;
+  background: var(--panel);
+  font: inherit;
+  cursor: pointer;
+}
+
+.session-transfer-file input:focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
+}
+
+.session-transfer button:disabled,
+.session-transfer input:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+.session-transfer button:disabled:hover,
+.session-transfer button:disabled:focus-visible {
+  filter: none;
+  transform: none;
+}
+
+.session-transfer-status,
+.session-transfer-error {
+  margin: 16px 0 0;
+  font-size: .9rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.session-transfer-status {
+  color: var(--green);
+}
+
+.session-transfer-status:empty {
+  margin: 0;
+}
+
+.session-transfer-error {
+  color: #f39e80;
+}
+
+@media (max-width: 480px) {
+  .session-transfer {
+    padding: 16px;
+  }
+
+  .session-transfer-controls {
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .session-transfer-controls > button,
+  .session-transfer-file {
+    flex-basis: 100%;
+  }
+}

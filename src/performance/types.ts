@@ -62,6 +62,11 @@ export interface CompletedSession {
   items: SessionItem[]
 }
 
+export interface ImportResult {
+  imported: number
+  skipped: number
+}
+
 export interface AttemptMarker {
   sessionId: string
   gameId: GameId

@@ -117,6 +117,96 @@ export function validateCompletedSession(value: CompletedSession): void {
   })
 }
 
+function record(value: unknown, path: string): asserts value is Record<string, unknown> {
+  assert(value !== null && typeof value === 'object' && !Array.isArray(value)
+    && (Object.getPrototypeOf(value) === Object.prototype || Object.getPrototypeOf(value) === null), `${path} must be an object`)
+}
+
+function jsonShape(value: unknown, path: string, ancestors = new Set<object>()): void {
+  if (value !== null && typeof value === 'object') {
+    assert(!ancestors.has(value), `${path} must not contain cycles`)
+    ancestors.add(value)
+    if (Array.isArray(value)) {
+      for (let index = 0; index < value.length; index++) {
+        assert(value[index] !== undefined, `${path}[${index}] must be a JSON value`)
+        jsonShape(value[index], `${path}[${index}]`, ancestors)
+      }
+    } else {
+      record(value, path)
+      Object.entries(value).forEach(([key, entry]) => jsonShape(entry, `${path}.${key}`, ancestors))
+    }
+    ancestors.delete(value)
+  } else checkValue(value, path)
+}
+
+function fieldType(value: Record<string, unknown>, name: string, type: 'string' | 'number' | 'boolean', optional = false): void {
+  if (optional && value[name] === undefined) return
+  assert(typeof value[name] === type, `${name} must be a ${type}`)
+  if (type === 'number') assert(Number.isFinite(value[name]), `${name} must be finite`)
+}
+
+export function isIsoTimestamp(value: unknown): value is string {
+  if (typeof value !== 'string') return false
+  const match = /^(\d{4})-(\d{2})-(\d{2})T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/.exec(value)
+  if (!match || !Number.isFinite(Date.parse(value))) return false
+  const year = Number(match[1]); const month = Number(match[2]); const day = Number(match[3])
+  const leapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0)
+  const days = month === 2 ? leapYear ? 29 : 28 : [4, 6, 9, 11].includes(month) ? 30 : 31
+  return month >= 1 && month <= 12 && day >= 1 && day <= days && value.slice(11, 13) !== '24'
+}
+
+// Check untrusted backup shapes before the existing typed semantic validators.
+export function validateCompletedSessionShape(value: unknown): asserts value is CompletedSession {
+  record(value, 'completed session')
+  record(value.session, 'session')
+  assert(Array.isArray(value.items), 'items must be an array')
+  jsonShape(value, 'completed session')
+  const session = value.session
+  for (const name of ['sessionId', 'gameId', 'startedAt', 'completedAt', 'status', 'terminationReason']) fieldType(session, name, 'string')
+  for (const name of ['schemaVersion', 'actualDurationMs', 'completedItemCount', 'itemCount']) fieldType(session, name, 'number')
+  for (const name of ['difficulty', 'mode']) fieldType(session, name, 'string', true)
+  for (const name of ['plannedDurationMs', 'plannedItemCount', 'score']) fieldType(session, name, 'number', true)
+  record(session.config, 'config')
+  record(session.summary, 'summary')
+  for (const name of ['accuracy', 'primaryScore', 'medianResponseTimeMs']) fieldType(session.summary, name, 'number', true)
+  assert(isIsoTimestamp(session.startedAt) && isIsoTimestamp(session.completedAt), 'timestamps must be ISO dates')
+  for (const item of value.items) {
+    record(item, 'item')
+    for (const name of ['sessionId', 'gameId', 'status']) fieldType(item, name, 'string')
+    for (const name of ['index', 'payloadVersion']) fieldType(item, name, 'number')
+    fieldType(item, 'outcome', 'string', true)
+    fieldType(item, 'responseTimeMs', 'number', true)
+    for (const name of ['startedAt', 'completedAt']) {
+      if (item[name] !== undefined) assert(isIsoTimestamp(item[name]), `${name} must be an ISO date`)
+    }
+    assert(GAME_IDS.includes(item.gameId as GameId), 'unknown item gameId')
+    record(item.payload, 'payload')
+    const payload = item.payload
+    fieldType(payload, 'responseTimeMs', 'number')
+    assert((payload.responseTimeMs as number) >= 0, 'payload response time must be non-negative')
+    const gameId = item.gameId as GameId
+    if (['quick-math', 'sequences', 'radix-rush', 'tape-recall', 'foldsight'].includes(gameId)) {
+      fieldType(payload, 'given', 'string')
+      fieldType(payload, 'correct', 'boolean')
+    } else if (gameId === 'magnitude-forge') {
+      for (const name of ['minimum', 'maximum']) if (payload[name] !== null) fieldType(payload, name, 'number')
+      fieldType(payload, 'score', 'number')
+      fieldType(payload, 'timedOut', 'boolean')
+    } else {
+      const stringFields = gameId === 'hidden-spread' ? ['maker', 'userRole']
+        : gameId === 'basket-edge' ? ['opportunity', 'action'] : ['action']
+      const numberFields = gameId === 'hidden-spread' ? ['budgetBefore', 'userBudget']
+        : gameId === 'basket-edge' ? ['fairValue', 'budgetBefore', 'budget']
+          : gameId === 'venue-gap' ? ['budgetBefore', 'budget']
+            : ['initial', 'residual', 'cost', 'score', 'exposureReductionScore']
+      stringFields.forEach(name => fieldType(payload, name, 'string'))
+      numberFields.forEach(name => fieldType(payload, name, 'number'))
+    }
+    for (const name of REQUIRED_PAYLOAD_FIELDS[gameId]) assert(payload[name] !== undefined, `${gameId} payload is missing ${name}`)
+  }
+  validateCompletedSession(value as unknown as CompletedSession)
+}
+
 export function normalizeSession(value: unknown): SessionResult {
   assert(Boolean(value && typeof value === 'object'), 'session must be an object')
   const raw = value as Partial<SessionResult> & { schemaVersion?: number }
@@ -130,6 +220,6 @@ export function normalizeSession(value: unknown): SessionResult {
 
 export function stableStringify(value: unknown): string {
   if (Array.isArray(value)) return `[${value.map(stableStringify).join(',')}]`
-  if (value && typeof value === 'object') return `{${Object.entries(value).sort(([a], [b]) => a.localeCompare(b)).map(([key, entry]) => `${JSON.stringify(key)}:${stableStringify(entry)}`).join(',')}}`
+  if (value && typeof value === 'object') return `{${Object.entries(value).filter(([, entry]) => entry !== undefined).sort(([a], [b]) => a.localeCompare(b)).map(([key, entry]) => `${JSON.stringify(key)}:${stableStringify(entry)}`).join(',')}}`
   return JSON.stringify(value)
 }

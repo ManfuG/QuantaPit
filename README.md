@@ -22,6 +22,7 @@ It provides short practice sessions for quantitative reasoning, logic, memory, v
   - Delta Shield
 - Open-ended interview question practice
 - Local session persistence with IndexedDB
+- Portable local JSON export and import of completed session history
 - Compact per-game charts: accuracy for answer-based games, score for Magnitude Forge and Delta Shield, and P&L for trading games
 - Last-five trend medians and ten-session comparisons
 - Expandable session details with response time, completion, duration, and secondary accuracy where recorded
@@ -146,6 +147,43 @@ The application does not require an account or a remote API. Local browser data 
 
 Do not commit credentials, `.env` files, browser exports, or private notes. Personal project notes are intentionally excluded from the repository through `.gitignore`.
 
+### Exporting and importing performance history
+
+Open **Statistics** and use **Export sessions** to download a JSON backup. Export includes all completed sessions and their granular session items, even beyond the latest twenty shown in each game chart. Empty history produces a valid empty backup. Active/abandoned attempts and browser preferences are not exported.
+
+On another browser or device, open QuantaPit → **Statistics** → **Import sessions** and select the backup file. No account, upload, or server request is involved. The overview refreshes after a successful import and reports imported sessions and skipped duplicates.
+
+Imports are additive and atomic:
+
+- New session IDs are added with their items and completed attempt markers.
+- Identical session IDs already stored or repeated in the file are skipped. Object-key order, item-array order, and JSON-omitted optional properties do not create conflicts.
+- A session ID with different content rejects the entire file. Existing sessions are never replaced.
+- IDs colliding with active/abandoned attempts or orphaned stored items also reject the entire file.
+- Malformed JSON, unsupported versions/games, invalid field types, invalid configurations, mismatched item references/counts, and duplicate item indexes are rejected before storage changes.
+- Storage write failures roll back the whole import. Export refuses invalid local records rather than silently omitting them.
+
+#### Backup format, version 1
+
+```json
+{
+  "format": "quantapit-performance",
+  "version": 1,
+  "exportedAt": "2026-10-01T00:00:00.000Z",
+  "sessions": []
+}
+```
+
+`exportedAt` is an ISO 8601 timestamp. Each `sessions` entry contains `{ "session": <SessionResult>, "items": <SessionItem[]> }`, using the existing performance schema:
+
+- `session` has `schemaVersion: 1`, a nonempty `sessionId`, a supported `gameId`, ISO start/completion timestamps, `status: "completed"`, a termination reason, configuration, duration/count metadata, and a summary. Optional difficulty, mode, planned limits, and score are preserved.
+- Each item has `payloadVersion: 1`, the same session/game IDs, a unique nonnegative `index`, a terminal item status, and its game-specific JSON `payload`. Optional outcome, timestamps, and response time are preserved.
+- All recorded question/round data, answers, trading decisions, and metrics remain in their original payloads. Files with unknown backup, session, or payload versions are not imported.
+
+The backup version is independent of the IndexedDB database version. The existing database and stores are unchanged. Legacy local sessions already supported by the repository are normalized to the current session schema when exported.
+
+Keep backup files private: they contain your complete exported practice history. Clearing browser storage still removes local history; restore it by importing a previously exported file.
+
+
 ## Development workflow
 
 The project was developed through an iterative, agent-assisted **vibe coding** workflow. OpenAI Codex, running through the Oh My Pi/AgenticOS harness, was used for conversational prototyping, code exploration, refactoring, test creation, documentation, and UI iteration.
@@ -161,7 +199,7 @@ Vibe coding accelerated the feedback loop, but changes were kept under human dir
 
 - The project is still an early prototype.
 - The game catalogue and scoring rules may change substantially.
-- Browser-local data has no synchronization or backup mechanism.
+- Browser-local data has no automatic synchronization; backups must be exported manually.
 - Some UI, accessibility, and responsive edge cases remain to be improved.
 - Statistics are intentionally limited to locally completed sessions.
 - There is no authentication, shared leaderboard, or server-side persistence.

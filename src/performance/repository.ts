@@ -1,8 +1,9 @@
-import type { AttemptMarker, CompletedSession, DataQualityIssue, SessionFilters, SessionItem, SessionResult, ValidatedCompletedData } from './types'
-import { normalizeSession, stableStringify, validateCompletedSession } from './validation'
+import type { AttemptMarker, CompletedSession, DataQualityIssue, ImportResult, SessionFilters, SessionItem, SessionResult, ValidatedCompletedData } from './types'
+import { normalizeSession, stableStringify, validateCompletedSession, validateCompletedSessionShape } from './validation'
 
 export interface PerformanceRepository {
   complete(value: CompletedSession): Promise<void>
+  importCompletedData(values: CompletedSession[]): Promise<ImportResult>
   getCompletedSessions(filters?: SessionFilters): Promise<SessionResult[]>
   getSession(sessionId: string): Promise<CompletedSession | null>
   getCompletedData(filters?: SessionFilters): Promise<CompletedSession[]>
@@ -17,6 +18,34 @@ function matches(session: SessionResult, filters: SessionFilters) {
     && (!filters.to || session.completedAt <= filters.to)
 }
 
+function completedFingerprint(value: CompletedSession): string {
+  return stableStringify({ session: value.session, items: [...value.items].sort((a, b) => a.index - b.index) })
+}
+
+function completedAttempt(value: CompletedSession): AttemptMarker {
+  const session = value.session
+  return { sessionId: session.sessionId, gameId: session.gameId, startedAt: session.startedAt, difficulty: session.difficulty, config: session.config, plannedDurationMs: session.plannedDurationMs, plannedItemCount: session.plannedItemCount, state: 'completed' }
+}
+
+function prepareImport(values: CompletedSession[]): { values: CompletedSession[]; skipped: number } {
+  if (!Array.isArray(values)) throw new Error('Invalid performance data: sessions must be an array')
+  const unique = new Map<string, CompletedSession>()
+  let skipped = 0
+  for (const value of values) {
+    validateCompletedSessionShape(value)
+    const existing = unique.get(value.session.sessionId)
+    if (existing) {
+      if (completedFingerprint(existing) !== completedFingerprint(value)) throw new Error('Performance integrity conflict: duplicate session IDs contain different data')
+      skipped++
+    } else unique.set(value.session.sessionId, structuredClone(value))
+  }
+  return { values: [...unique.values()], skipped }
+}
+
+function assertImportAttempt(attempt: AttemptMarker | undefined): void {
+  if (attempt && attempt.state !== 'completed') throw new Error('Performance integrity conflict: session ID belongs to an active or abandoned attempt')
+}
+
 export class InMemoryPerformanceRepository implements PerformanceRepository {
   private readonly data = new Map<string, CompletedSession>()
   private readonly attempts = new Map<string, AttemptMarker>()
@@ -29,6 +58,25 @@ export class InMemoryPerformanceRepository implements PerformanceRepository {
     }
     this.data.set(value.session.sessionId, structuredClone(value))
     const attempt = this.attempts.get(value.session.sessionId); this.attempts.set(value.session.sessionId, attempt ? { ...attempt, state: 'completed' } : { sessionId: value.session.sessionId, gameId: value.session.gameId, startedAt: value.session.startedAt, difficulty: value.session.difficulty, config: value.session.config, plannedDurationMs: value.session.plannedDurationMs, plannedItemCount: value.session.plannedItemCount, state: 'completed' })
+  }
+  async importCompletedData(values: CompletedSession[]): Promise<ImportResult> {
+    const prepared = prepareImport(values)
+    const additions: CompletedSession[] = []
+    let skipped = prepared.skipped
+    for (const value of prepared.values) {
+      assertImportAttempt(this.attempts.get(value.session.sessionId))
+      const existing = this.data.get(value.session.sessionId)
+      if (existing) {
+        if (completedFingerprint(existing) !== completedFingerprint(value)) throw new Error('Performance integrity conflict: stored session differs from backup')
+        skipped++
+      } else additions.push(value)
+    }
+    // No awaits or writes until the entire batch has passed validation.
+    for (const value of additions) {
+      this.data.set(value.session.sessionId, value)
+      this.attempts.set(value.session.sessionId, completedAttempt(value))
+    }
+    return { imported: additions.length, skipped }
   }
   async startAttempt(attempt: AttemptMarker) { if (!this.attempts.has(attempt.sessionId)) this.attempts.set(attempt.sessionId, structuredClone(attempt)) }
   async getAttempts() { return [...this.attempts.values()].map(attempt => structuredClone(attempt)) }
@@ -85,6 +133,51 @@ export class IndexedDbPerformanceRepository implements PerformanceRepository {
     }
     const attemptStore = tx.objectStore(ATTEMPTS); const attempt = await requestResult(attemptStore.get(value.session.sessionId) as IDBRequest<AttemptMarker | undefined>); attemptStore.put(attempt ? { ...attempt, state: 'completed' } : { sessionId: value.session.sessionId, gameId: value.session.gameId, startedAt: value.session.startedAt, difficulty: value.session.difficulty, config: value.session.config, plannedDurationMs: value.session.plannedDurationMs, plannedItemCount: value.session.plannedItemCount, state: 'completed' })
     await transactionDone(tx)
+  }
+  async importCompletedData(values: CompletedSession[]): Promise<ImportResult> {
+    const prepared = prepareImport(values)
+    if (!prepared.values.length) return { imported: 0, skipped: prepared.skipped }
+    const db = await this.db()
+    // IndexedDB serializes overlapping readwrite transactions, including other
+    // tabs and completion writes. Conflict checks and writes share one lock.
+    const tx = db.transaction([SESSIONS, ITEMS, ATTEMPTS], 'readwrite')
+    const done = transactionDone(tx)
+    // A request can fail before execution reaches `await done`.
+    void done.catch(() => {})
+    try {
+      const sessions = tx.objectStore(SESSIONS)
+      const items = tx.objectStore(ITEMS)
+      const attempts = tx.objectStore(ATTEMPTS)
+      const additions: CompletedSession[] = []
+      let skipped = prepared.skipped
+      for (const value of prepared.values) {
+        const id = value.session.sessionId
+        const [existing, existingItems, attempt] = await Promise.all([
+          requestResult(sessions.get(id) as IDBRequest<SessionResult | undefined>),
+          requestResult(items.index('sessionId').getAll(id) as IDBRequest<SessionItem[]>),
+          requestResult(attempts.get(id) as IDBRequest<AttemptMarker | undefined>),
+        ])
+        assertImportAttempt(attempt)
+        if (existing) {
+          if (completedFingerprint({ session: normalizeSession(existing), items: existingItems }) !== completedFingerprint(value)) throw new Error('Performance integrity conflict: stored session differs from backup')
+          skipped++
+        } else {
+          if (existingItems.length) throw new Error('Performance integrity conflict: session ID has orphan items')
+          additions.push(value)
+        }
+      }
+      for (const value of additions) {
+        sessions.add(value.session)
+        value.items.forEach(item => items.add(item))
+        attempts.put(completedAttempt(value))
+      }
+      await done
+      return { imported: additions.length, skipped }
+    } catch (error) {
+      try { tx.abort() } catch { /* It may already have aborted or completed. */ }
+      await done.catch(() => {})
+      throw error
+    }
   }
   async getCompletedSessions(filters: SessionFilters = {}) {
     const db = await this.db(); const tx = db.transaction(SESSIONS, 'readonly'); const sessions = await requestResult(tx.objectStore(SESSIONS).getAll() as IDBRequest<SessionResult[]>); await transactionDone(tx)
