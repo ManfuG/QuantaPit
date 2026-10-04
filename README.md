@@ -2,6 +2,12 @@
 
 QuantaPit is a **local-first quantitative and market interview training platform** built with React, TypeScript, Vite, IndexedDB, and Vitest.
 
+[![QuantaPit demo: Quick Math, Venue Gap arbitrage, interview questions, and local performance statistics](./assets/quantapit-demo.gif)](./assets/quantapit-demo.mp4)
+
+**See it in action:** a 44-second walkthrough of Quick Math, a profitable Venue Gap trade, an interview question with its answer, and saved-session charts and details. All interactions and results come from the running application.
+
+[View or download the full-resolution video (MP4)](./assets/quantapit-demo.mp4).
+
 It provides short practice sessions for quantitative reasoning, logic, memory, visual reasoning, market making, arbitrage, portfolio hedging, and open-ended interview questions. Completed sessions are stored locally in the browser and exposed through per-game performance statistics.
 
 > **Early-stage notice:** This is the very first version and the first project phase. It is a working prototype, not a production-ready product. There are still many rough edges, incomplete areas, and known issues.
