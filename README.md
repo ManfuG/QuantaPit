@@ -2,9 +2,9 @@
 
 QuantaPit is a **local-first quantitative and market interview training platform** built with React, TypeScript, Vite, IndexedDB, and Vitest.
 
-[![QuantaPit demo: Quick Math, Venue Gap arbitrage, interview questions, and local performance statistics](./assets/quantapit-demo.gif)](./assets/quantapit-demo.mp4)
+[![QuantaPit portfolio-aligned design demo: home, Quick Math, Venue Gap, interview questions, and local statistics](./assets/quantapit-demo.gif)](./assets/quantapit-demo.mp4)
 
-**See it in action:** a 44-second walkthrough of Quick Math, a profitable Venue Gap trade, an interview question with its answer, and saved-session charts and details. All interactions and results come from the running application.
+**See it in action:** a walkthrough of the redesigned home and game catalogues, a correct Quick Math answer, a profitable Venue Gap trade, an interview question with its answer, and saved-session charts and details. Recorded from the production build; all interactions and results come from the running application.
 
 [View or download the full-resolution video (MP4)](./assets/quantapit-demo.mp4).
 
@@ -36,6 +36,16 @@ It provides short practice sessions for quantitative reasoning, logic, memory, v
 - Responsive desktop and mobile UI
 - Custom session durations, question targets, and round clocks with validated game-specific limits
 - No account, backend, cloud storage, telemetry, or external runtime service
+
+## Design continuity
+
+QuantaPit follows the visual language of `giacomo-portfolio`: a purple-black canvas (`#100f1d`), ivory text (`#f4ecd8`), coral actions (`#f38b68`), mineral accents (`#8fc5b6`), rounded panels, and a quiet orbital illustration. Syne headings and Fraunces reading text are self-hosted; arithmetic, quotes, clocks, and performance data retain monospaced numerals. No external font service is used.
+
+The redesign covers navigation, catalogues, every game's setup/live/results screens, interview practice, statistics, and local-history transfer. Existing routes, rules, timers, configurable limits, scoring, and IndexedDB records are unchanged. Positive and negative feedback stay visually distinct; keyboard focus, disabled states, and reduced-motion preferences are supported.
+
+Verification: **364 tests passed**, with a successful TypeScript/Vite production build. Real Chromium sessions completed all ten games plus interview question practice; statistics survived a reload. Setup and live screens were checked at 390px and 320px, including Hard difficulty where available, with no horizontal page overflow or clipped controls in those scenarios. The mobile FoldSight net uses its natural height so all faces remain separate from the answer cubes.
+
+Bundled Syne and Fraunces fonts are licensed under the SIL Open Font License 1.1; their copyright notices and full licenses are included in [`public/fonts/Syne-OFL.txt`](./public/fonts/Syne-OFL.txt) and [`public/fonts/Fraunces-OFL.txt`](./public/fonts/Fraunces-OFL.txt).
 
 ## Technology
 

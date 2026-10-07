@@ -44,11 +44,72 @@ function StorageNotice() {
   return visible ? <div className="storage-notice" role="status">Session complete, but local statistics could not be saved.<button onClick={() => setVisible(false)} aria-label="Dismiss">×</button></div> : null
 }
 function Layout() {
-  return <><header className="site-header"><NavLink className="brand" to="/">QuantaPit</NavLink><nav aria-label="Main navigation">{navItems.map(([label, path]) => <NavLink key={path} to={path} className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>{label}</NavLink>)}</nav></header><main><Outlet /></main><StorageNotice /></>
+  return <>
+    <a className="skip-link" href="#main-content">Skip to content</a>
+    <header className="site-header">
+      <NavLink className="brand" to="/" aria-label="QuantaPit home">QuantaPit<span className="brand-dot" aria-hidden="true">.</span></NavLink>
+      <nav aria-label="Main navigation">
+        {navItems.map(([label, path]) => <NavLink key={path} to={path} className={({ isActive }) => isActive ? 'nav-link active' : 'nav-link'}>{label}</NavLink>)}
+      </nav>
+    </header>
+    <main id="main-content" tabIndex={-1}><Outlet /></main>
+    <footer className="site-footer">
+      <NavLink className="brand" to="/" aria-label="QuantaPit home">QuantaPit<span className="brand-dot" aria-hidden="true">.</span></NavLink>
+      <p>Focused practice. Session history stored locally in your browser.</p>
+    </footer>
+    <StorageNotice />
+  </>
 }
 
 function Home() {
-  return <section className="hero page"><p className="eyebrow">TRADING INTERVIEW TRAINING</p><h1>Think clearly.<br /><span>Move precisely.</span></h1><p className="intro">QuantaPit is a focused space to sharpen the logic, mathematics and reasoning skills used in trading interviews.</p><div className="card-grid">{navItems.map(([label, path], index) => <NavLink className="feature-card" to={path} key={path}><span className="card-number">0{index + 1}</span><strong>{label}</strong><span className="arrow">↗</span></NavLink>)}</div></section>
+  const descriptions = [
+    'Build speed and accuracy with arithmetic, patterns and spatial reasoning.',
+    'Practice pricing, trading and risk decisions under uncertainty.',
+    'Work through interview questions and compare your reasoning.',
+    'Review completed sessions and follow your progress over time.',
+  ]
+  return <section className="hero page">
+    <div className="hero-layout">
+      <div className="hero-copy">
+        <p className="eyebrow">TRADING INTERVIEW TRAINING</p>
+        <h1>Think clearly.<br /><span>Move precisely.</span></h1>
+        <p className="intro">QuantaPit is a focused space to sharpen the logic, mathematics and reasoning skills used in trading interviews.</p>
+        <p className="hero-note">No account needed. Your practice history stays in this browser.</p>
+      </div>
+      <svg className="practice-orbit" viewBox="0 0 440 400" fill="none" aria-hidden="true" focusable="false">
+        <circle className="orbit-line" cx="220" cy="192" r="148" strokeDasharray="2 9" />
+        <ellipse className="orbit-line" cx="220" cy="192" rx="184" ry="76" transform="rotate(-32 220 192)" />
+        <ellipse className="orbit-line" cx="220" cy="192" rx="164" ry="106" transform="rotate(38 220 192)" />
+        <circle className="orbit-line" cx="220" cy="192" r="96" />
+        <path className="orbit-line" d="M220 30v14M220 340v14M58 192h14M368 192h14M212 192h16M220 184v16" />
+        <circle className="orbit-core" cx="220" cy="192" r="47" />
+        <circle className="orbit-line" cx="220" cy="192" r="56" />
+        <circle className="orbit-node" cx="99" cy="93" r="7" />
+        <circle className="orbit-node" cx="360" cy="125" r="5" />
+        <circle className="orbit-node" cx="143" cy="273" r="5" />
+        <circle className="orbit-node" cx="299" cy="317" r="7" />
+        <text className="orbit-caption" x="82" y="71" textAnchor="middle">LOGIC</text>
+        <text className="orbit-caption" x="366" y="105" textAnchor="middle">REASON</text>
+        <text className="orbit-caption" x="114" y="299" textAnchor="middle">PRACTICE</text>
+        <text className="orbit-caption" x="328" y="346" textAnchor="middle">PRECISION</text>
+        <text className="orbit-caption" x="220" y="168" textAnchor="middle">QP</text>
+        <text className="orbit-caption" x="220" y="222" textAnchor="middle">FOCUS</text>
+        <text className="orbit-caption" x="220" y="387" textAnchor="middle">CLARITY / PRECISION</text>
+      </svg>
+    </div>
+    <div className="home-section-label">
+      <h2 className="eyebrow">CHOOSE YOUR PRACTICE</h2>
+      <span>Four ways to sharpen your edge.</span>
+    </div>
+    <div className="card-grid">
+      {navItems.map(([label, path], index) => <NavLink className="feature-card" to={path} key={path}>
+        <span className="card-number">0{index + 1}</span>
+        <strong>{label}</strong>
+        <span className="card-description">{descriptions[index]}</span>
+        <span className="arrow" aria-hidden="true">↗</span>
+      </NavLink>)}
+    </div>
+  </section>
 }
 
 function EmptyPage({ title }: { title: string }) { return <section className="page empty-page"><p className="eyebrow">QUANTAPIT</p><h1>{title}</h1></section> }
