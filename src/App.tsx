@@ -43,9 +43,37 @@ function StorageNotice() {
   useEffect(() => { const show = () => setVisible(true); window.addEventListener('performance-storage-error', show); return () => window.removeEventListener('performance-storage-error', show) }, [])
   return visible ? <div className="storage-notice" role="status">Session complete, but local statistics could not be saved.<button onClick={() => setVisible(false)} aria-label="Dismiss">×</button></div> : null
 }
+function SideGarden({ side }: { side: 'left' | 'right' }) {
+  return <svg className={`side-garden side-garden--${side}`} viewBox="0 0 220 640" fill="none" aria-hidden="true" focusable="false">
+    <g className="garden-contours">
+      <path d="M-80 600C40 380 130 470 250 210M-65 630C55 410 145 500 265 240M-50 660C70 440 160 530 280 270M-35 690C85 470 175 560 295 300" />
+      <path d="M-70 555C80 520 140 340 240 390M-70 575C80 540 140 360 240 410M-70 595C80 560 140 380 240 430" />
+      <ellipse cx="12" cy="190" rx="115" ry="52" transform="rotate(-34 12 190)" />
+      <ellipse cx="12" cy="190" rx="78" ry="35" transform="rotate(28 12 190)" />
+    </g>
+    <g className="garden-leaves">
+      <path d="M22 620C12 534 36 446 78 368C96 473 76 560 22 620Z" />
+      <path d="M24 612C-15 562-26 501-16 444C39 484 55 550 24 612Z" />
+      <path d="M28 598C53 527 95 477 153 459C131 528 81 579 28 598Z" />
+      <path d="M15 634C71 601 117 598 170 618C112 650 56 652 15 634Z" />
+    </g>
+    <g className="garden-veins">
+      <path d="M18 636Q62 491 78 380M27 602Q20 532-15 455M25 607Q88 524 145 466M18 635Q92 620 160 621" />
+      <path d="m49 527-22-30m31-6 25-27m-14-6-13-31m-8 137 40-7m-19-30 39-4" />
+      <path d="m32 93 0 12m-6-6h12m87 177v14m-7-7h14m-65 37v10m-5-5h10" />
+    </g>
+    <g className="garden-stars">
+      <circle cx="32" cy="99" r="2" /><circle cx="125" cy="284" r="3" />
+      <circle cx="61" cy="326" r="2" /><circle cx="89" cy="145" r="3" />
+      <circle cx="173" cy="354" r="2" /><circle cx="14" cy="251" r="2" />
+    </g>
+  </svg>
+}
+
 function Layout() {
   return <>
     <a className="skip-link" href="#main-content">Skip to content</a>
+    <div className="page-ornaments" aria-hidden="true"><SideGarden side="left" /><SideGarden side="right" /></div>
     <header className="site-header">
       <NavLink className="brand" to="/" aria-label="QuantaPit home">QuantaPit<span className="brand-dot" aria-hidden="true">.</span></NavLink>
       <nav aria-label="Main navigation">
@@ -77,24 +105,22 @@ function Home() {
         <p className="hero-note">No account needed. Your practice history stays in this browser.</p>
       </div>
       <svg className="practice-orbit" viewBox="0 0 440 400" fill="none" aria-hidden="true" focusable="false">
-        <circle className="orbit-line" cx="220" cy="192" r="148" strokeDasharray="2 9" />
-        <ellipse className="orbit-line" cx="220" cy="192" rx="184" ry="76" transform="rotate(-32 220 192)" />
-        <ellipse className="orbit-line" cx="220" cy="192" rx="164" ry="106" transform="rotate(38 220 192)" />
+        <circle className="orbit-line orbit-guide" cx="220" cy="192" r="148" strokeDasharray="2 9" />
+        <g transform="rotate(-32 220 192)">
+          <ellipse className="orbit-line" cx="220" cy="192" rx="184" ry="76" />
+          <circle className="orbit-body orbit-body--outer" r="9" />
+          <circle className="orbit-body orbit-body--outer orbit-body--companion" r="4" />
+        </g>
+        <g transform="rotate(38 220 192)">
+          <ellipse className="orbit-line" cx="220" cy="192" rx="164" ry="106" />
+          <circle className="orbit-body orbit-body--middle" r="7" />
+        </g>
         <circle className="orbit-line" cx="220" cy="192" r="96" />
-        <path className="orbit-line" d="M220 30v14M220 340v14M58 192h14M368 192h14M212 192h16M220 184v16" />
+        <circle className="orbit-body orbit-body--inner" r="5" />
+        <path className="orbit-line" d="M220 30v14M220 340v14M58 192h14M368 192h14" />
         <circle className="orbit-core" cx="220" cy="192" r="47" />
+        <path className="orbit-eclipse" d="M220 145a47 47 0 1 0 0 94c-27-21-27-73 0-94Z" />
         <circle className="orbit-line" cx="220" cy="192" r="56" />
-        <circle className="orbit-node" cx="99" cy="93" r="7" />
-        <circle className="orbit-node" cx="360" cy="125" r="5" />
-        <circle className="orbit-node" cx="143" cy="273" r="5" />
-        <circle className="orbit-node" cx="299" cy="317" r="7" />
-        <text className="orbit-caption" x="82" y="71" textAnchor="middle">LOGIC</text>
-        <text className="orbit-caption" x="366" y="105" textAnchor="middle">REASON</text>
-        <text className="orbit-caption" x="114" y="299" textAnchor="middle">PRACTICE</text>
-        <text className="orbit-caption" x="328" y="346" textAnchor="middle">PRECISION</text>
-        <text className="orbit-caption" x="220" y="168" textAnchor="middle">QP</text>
-        <text className="orbit-caption" x="220" y="222" textAnchor="middle">FOCUS</text>
-        <text className="orbit-caption" x="220" y="387" textAnchor="middle">CLARITY / PRECISION</text>
       </svg>
     </div>
     <div className="home-section-label">

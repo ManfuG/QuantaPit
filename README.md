@@ -4,7 +4,7 @@ QuantaPit is a **local-first quantitative and market interview training platform
 
 [![QuantaPit portfolio-aligned design demo: home, Quick Math, Venue Gap, interview questions, and local statistics](./assets/quantapit-demo.gif)](./assets/quantapit-demo.mp4)
 
-**See it in action:** a walkthrough of the redesigned home and game catalogues, a correct Quick Math answer, a profitable Venue Gap trade, an interview question with its answer, and saved-session charts and details. Recorded from the production build; all interactions and results come from the running application.
+**See it in action:** a walkthrough of the plum-coloured home with animated orbits and botanical side ornaments, the game catalogues, a correct Quick Math answer, a profitable Venue Gap trade, an interview question with its answer, and saved-session charts and details. Recorded from the production build at the enlarged default interface scale; all interactions and results come from the running application.
 
 [View or download the full-resolution video (MP4)](./assets/quantapit-demo.mp4).
 
@@ -39,11 +39,15 @@ It provides short practice sessions for quantitative reasoning, logic, memory, v
 
 ## Design continuity
 
-QuantaPit follows the visual language of `giacomo-portfolio`: a purple-black canvas (`#100f1d`), ivory text (`#f4ecd8`), coral actions (`#f38b68`), mineral accents (`#8fc5b6`), rounded panels, and a quiet orbital illustration. Syne headings and Fraunces reading text are self-hosted; arithmetic, quotes, clocks, and performance data retain monospaced numerals. No external font service is used.
+QuantaPit continues the visual language of `giacomo-portfolio` with its own palette: a dark plum canvas (`#24182f`), warm ivory text (`#fff1dd`), peach actions (`#f4b183`), sage accents (`#a5cdb0`), lavender details, and rounded panels. Botanical engravings, contour lines, and small celestial details enrich the page edges without intercepting input; they are quieter during games. Syne headings and Fraunces reading text are self-hosted; arithmetic, quotes, clocks, and performance data retain monospaced numerals. No external font service is used.
 
 The redesign covers navigation, catalogues, every game's setup/live/results screens, interview practice, statistics, and local-history transfer. Existing routes, rules, timers, configurable limits, scoring, and IndexedDB records are unchanged. Positive and negative feedback stay visually distinct; keyboard focus, disabled states, and reduced-motion preferences are supported.
 
-Verification: **364 tests passed**, with a successful TypeScript/Vite production build. Real Chromium sessions completed all ten games plus interview question practice; statistics survived a reload. Setup and live screens were checked at 390px and 320px, including Hard difficulty where available, with no horizontal page overflow or clipped controls in those scenarios. The mobile FoldSight net uses its natural height so all faces remain separate from the answer cubes.
+The home illustration is decorative and has no labels. Its bodies travel along their elliptical tracks using CSS motion paths at different speeds, without a JavaScript animation loop. Reduced-motion preferences stop the bodies at distinct positions.
+
+The interface has a **110% base scale** using CSS `zoom: 1.1`: browser zoom remains user-controlled, while the previous 110% presentation becomes the new default at browser 100%. Responsive breakpoints are scaled to match, so mobile controls continue to reflow rather than being cropped.
+
+Refinement verification: a successful TypeScript/Vite production build and real Chromium sessions completing all ten games plus interview practice at 320px, including all five Hidden Spread roles. Statistics survived a reload. Home layouts were checked at 320, 390, 528, 768, 880, 980, 1280, 1440, and 1920px; Hard live screens were checked at 320 and 1440px, with no horizontal page overflow or clipped controls in those scenarios. Orbit positions changed over time and stayed fixed with reduced motion. The mobile FoldSight net uses its natural height so all faces remain separate from the answer cubes.
 
 Bundled Syne and Fraunces fonts are licensed under the SIL Open Font License 1.1; their copyright notices and full licenses are included in [`public/fonts/Syne-OFL.txt`](./public/fonts/Syne-OFL.txt) and [`public/fonts/Fraunces-OFL.txt`](./public/fonts/Fraunces-OFL.txt).
 
