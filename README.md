@@ -27,6 +27,7 @@ It provides short practice sessions for quantitative reasoning, logic, memory, v
   - Venue Gap
   - Delta Shield
 - Open-ended interview question practice
+- In-app Guide with objectives, setup, controls, session endings and scoring for all ten games and interview practice
 - Local session persistence with IndexedDB
 - Portable local JSON export and import of completed session history
 - Compact per-game charts: accuracy for answer-based games, score for Magnitude Forge and Delta Shield, and P&L for trading games
@@ -43,7 +44,7 @@ QuantaPit continues the visual language of `giacomo-portfolio` with its own pale
 
 The redesign covers navigation, catalogues, every game's setup/live/results screens, interview practice, statistics, and local-history transfer. Existing routes, rules, timers, configurable limits, scoring, and IndexedDB records are unchanged. Positive and negative feedback stay visually distinct; keyboard focus, disabled states, and reduced-motion preferences are supported.
 
-The home illustration is decorative and has no labels. Its bodies travel along their elliptical tracks using CSS motion paths at different speeds, without a JavaScript animation loop. Reduced-motion preferences stop the bodies at distinct positions.
+The home illustration is decorative and has no labels. Each moving body uses SVG `animateMotion` referencing the same path drawn as its orbit, inside the same rotation group; differing periods do not change the trajectory. No JavaScript animation loop is needed. Reduced-motion preferences replace motion with distinct stationary positions on those same tracks. The home links to Statistics for export/import of completed game sessions.
 
 The interface has a **110% base scale** using CSS `zoom: 1.1`: browser zoom remains user-controlled, while the previous 110% presentation becomes the new default at browser 100%. Responsive breakpoints are scaled to match, so mobile controls continue to reflow rather than being cropped.
 
@@ -134,6 +135,11 @@ npm run preview
 - `/open-questions` — Interview question practice
 - `/statistics` — Local performance overview and activity streak
 - `/statistics/:gameId` — Per-game performance detail
+- `/guide` — How to play every game, with an index and direct practice links
+
+Questions setup uses the shared page alignment and `03 / QUESTIONS` label. Guide covers all six logic/math games, all four market games and untimed interview practice, including how each game's displayed budget or score is calculated.
+
+Current refinement checks: all 364 existing tests passed and the portfolio production build compiled QuantaPit at its embedded base. Chromium exercised all eleven Guide practice destinations, a complete Questions reveal/finish flow, and home/Guide/Questions layouts at desktop and 390px. Four orbital bodies were sampled at six animation times against their rendered paths; reduced-motion positions also lie on the tracks. A real completed Quick Math session was exported and imported into the embedded application.
 
 ### Configuring practice
 

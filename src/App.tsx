@@ -19,14 +19,16 @@ import { performanceRepository } from './performance/repository'
 import { consecutiveDayStreak, statisticsByGame } from './performance/metrics'
 import { StatisticsDetail, TrendLabel } from './performance/StatisticsDetail'
 import { SessionTransfer } from './performance/SessionTransfer'
+import { Guide } from './Guide'
 import './styles.css'
 
-const navItems = [
-  ['Logic and math games', '/logic-and-math-games'],
-  ['Market games', '/market-games'],
-  ['Questions', '/open-questions'],
-  ['Statistics', '/statistics'],
+const practiceItems = [
+  ['Logic and math games', '/logic-and-math-games', 'Build speed and accuracy with arithmetic, patterns and spatial reasoning.'],
+  ['Market games', '/market-games', 'Practice pricing, trading and risk decisions under uncertainty.'],
+  ['Questions', '/open-questions', 'Work through interview questions and compare your reasoning.'],
+  ['Statistics', '/statistics', 'Review completed sessions and follow your progress over time.'],
 ]
+const navItems = [...practiceItems.map(([label, path]) => [label, path]), ['Guide', '/guide']]
 const durations = GAME_DURATIONS
 const questionCounts = GAME_QUESTION_COUNTS
 type Settings = { duration: number; questions: number; difficulty: Difficulty }
@@ -90,48 +92,58 @@ function Layout() {
 }
 
 function Home() {
-  const descriptions = [
-    'Build speed and accuracy with arithmetic, patterns and spatial reasoning.',
-    'Practice pricing, trading and risk decisions under uncertainty.',
-    'Work through interview questions and compare your reasoning.',
-    'Review completed sessions and follow your progress over time.',
-  ]
+  const [reducedMotion, setReducedMotion] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+  useEffect(() => {
+    const preference = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const update = () => setReducedMotion(preference.matches)
+    update()
+    preference.addEventListener('change', update)
+    return () => preference.removeEventListener('change', update)
+  }, [])
   return <section className="hero page">
     <div className="hero-layout">
       <div className="hero-copy">
         <p className="eyebrow">TRADING INTERVIEW TRAINING</p>
         <h1>Think clearly.<br /><span>Move precisely.</span></h1>
         <p className="intro">QuantaPit is a focused space to sharpen the logic, mathematics and reasoning skills used in trading interviews.</p>
-        <p className="hero-note">No account needed. Your practice history stays in this browser.</p>
+        <p className="hero-note">No account needed. Your practice history stays in this browser. Export and import completed game sessions in <NavLink to="/statistics">Statistics</NavLink> to back up your history or move it to another browser.</p>
       </div>
       <svg className="practice-orbit" viewBox="0 0 440 400" fill="none" aria-hidden="true" focusable="false">
         <circle className="orbit-line orbit-guide" cx="220" cy="192" r="148" strokeDasharray="2 9" />
         <g transform="rotate(-32 220 192)">
-          <ellipse className="orbit-line" cx="220" cy="192" rx="184" ry="76" />
-          <circle className="orbit-body orbit-body--outer" r="9" />
-          <circle className="orbit-body orbit-body--outer orbit-body--companion" r="4" />
+          <path id="orbit-outer" className="orbit-line" d="M404 192a184 76 0 1 0-368 0a184 76 0 1 0 368 0" />
+          <g transform={reducedMotion ? 'translate(404 192)' : undefined}>
+            <circle className="orbit-body orbit-body--outer" r="9" />
+            {!reducedMotion && <animateMotion dur="32s" begin="-7s" repeatCount="indefinite"><mpath href="#orbit-outer" /></animateMotion>}
+          </g>
+          <g transform={reducedMotion ? 'translate(36 192)' : undefined}>
+            <circle className="orbit-body orbit-body--companion" r="4" />
+            {!reducedMotion && <animateMotion dur="37s" begin="-23s" repeatCount="indefinite"><mpath href="#orbit-outer" /></animateMotion>}
+          </g>
         </g>
         <g transform="rotate(38 220 192)">
-          <ellipse className="orbit-line" cx="220" cy="192" rx="164" ry="106" />
-          <circle className="orbit-body orbit-body--middle" r="7" />
+          <path id="orbit-middle" className="orbit-line" d="M384 192a164 106 0 1 0-328 0a164 106 0 1 0 328 0" />
+          <g transform={reducedMotion ? 'translate(220 86)' : undefined}>
+            <circle className="orbit-body orbit-body--middle" r="7" />
+            {!reducedMotion && <animateMotion dur="26s" begin="-16s" repeatCount="indefinite"><mpath href="#orbit-middle" /></animateMotion>}
+          </g>
         </g>
-        <circle className="orbit-line" cx="220" cy="192" r="96" />
-        <circle className="orbit-body orbit-body--inner" r="5" />
+        <path id="orbit-inner" className="orbit-line" d="M316 192a96 96 0 1 0-192 0a96 96 0 1 0 192 0" />
+        <g transform={reducedMotion ? 'translate(220 288)' : undefined}>
+          <circle className="orbit-body orbit-body--inner" r="5" />
+          {!reducedMotion && <animateMotion dur="19s" begin="-4s" repeatCount="indefinite"><mpath href="#orbit-inner" /></animateMotion>}
+        </g>
         <path className="orbit-line" d="M220 30v14M220 340v14M58 192h14M368 192h14" />
         <circle className="orbit-core" cx="220" cy="192" r="47" />
         <path className="orbit-eclipse" d="M220 145a47 47 0 1 0 0 94c-27-21-27-73 0-94Z" />
         <circle className="orbit-line" cx="220" cy="192" r="56" />
       </svg>
     </div>
-    <div className="home-section-label">
-      <h2 className="eyebrow">CHOOSE YOUR PRACTICE</h2>
-      <span>Four ways to sharpen your edge.</span>
-    </div>
     <div className="card-grid">
-      {navItems.map(([label, path], index) => <NavLink className="feature-card" to={path} key={path}>
+      {practiceItems.map(([label, path, description], index) => <NavLink className="feature-card" to={path} key={path}>
         <span className="card-number">0{index + 1}</span>
         <strong>{label}</strong>
-        <span className="card-description">{descriptions[index]}</span>
+        <span className="card-description">{description}</span>
         <span className="arrow" aria-hidden="true">↗</span>
       </NavLink>)}
     </div>
@@ -421,7 +433,7 @@ function DeltaShield() {
 }
 
 function FormulaText({ text }: { text: string }) { const parts = text.split(/(\^\d+)/g); return <>{parts.map((part, index) => /^\^\d+$/.test(part) ? <sup className="formula-sup" key={index}>{part.slice(1)}</sup> : <span key={index}>{part}</span>)}</> }
-function QuestionsSetup({ mode, difficulty, count, error, onMode, onDifficulty, onCount, onStart }: { mode: QuestionMode; difficulty: QuestionDifficulty | 'Mixed'; count: string; error: string; onMode: (value: QuestionMode) => void; onDifficulty: (value: QuestionDifficulty | 'Mixed') => void; onCount: (value: string) => void; onStart: () => void }) { const available = filterQuestions(mode, difficulty).length; return <section className="page questions-setup"><p className="eyebrow">QUESTIONS / INTERVIEW PRACTICE</p><h1>Questions</h1><p className="section-intro">Open-ended questions for quant, trader, and research interviews.</p><div className="questions-settings"><label>Mode<select value={mode} onChange={event => onMode(event.target.value as QuestionMode)}><option value="Mixed">Mixed</option>{QUESTION_CATEGORIES.map(category => <option key={category}>{category}</option>)}</select></label><label>Difficulty<select value={difficulty} onChange={event => onDifficulty(event.target.value as QuestionDifficulty | 'Mixed')}><option>Mixed</option><option>Easy</option><option>Medium</option><option>Hard</option></select></label><label>Questions<input type="number" min="1" value={count} onChange={event => onCount(event.target.value)} /></label></div><p className="questions-availability">{available} questions available in this filter · no timer</p>{error && <p className="input-error" role="alert">{error}</p>}<button className="start-button" onClick={onStart}>Start session <span>→</span></button></section> }
+function QuestionsSetup({ mode, difficulty, count, error, onMode, onDifficulty, onCount, onStart }: { mode: QuestionMode; difficulty: QuestionDifficulty | 'Mixed'; count: string; error: string; onMode: (value: QuestionMode) => void; onDifficulty: (value: QuestionDifficulty | 'Mixed') => void; onCount: (value: string) => void; onStart: () => void }) { const available = filterQuestions(mode, difficulty).length; return <section className="page questions-setup"><p className="eyebrow">03 / QUESTIONS</p><h1>Questions</h1><p className="section-intro">Open-ended questions for quant, trader, and research interviews.</p><div className="questions-settings"><label>Mode<select value={mode} onChange={event => onMode(event.target.value as QuestionMode)}><option value="Mixed">Mixed</option>{QUESTION_CATEGORIES.map(category => <option key={category}>{category}</option>)}</select></label><label>Difficulty<select value={difficulty} onChange={event => onDifficulty(event.target.value as QuestionDifficulty | 'Mixed')}><option>Mixed</option><option>Easy</option><option>Medium</option><option>Hard</option></select></label><label>Questions<input type="number" min="1" value={count} onChange={event => onCount(event.target.value)} /></label></div><p className="questions-availability">{available} questions available in this filter · no timer</p>{error && <p className="input-error" role="alert">{error}</p>}<button className="start-button" onClick={onStart}>Start session <span>→</span></button></section> }
 function QuestionsResults({ questions, mode, difficulty, onAgain }: { questions: InterviewQuestion[]; mode: QuestionMode; difficulty: QuestionDifficulty | 'Mixed'; onAgain: () => void }) { return <section className="page questions-results"><p className="eyebrow">QUESTIONS / COMPLETE</p><h1>Session complete.</h1><p className="section-intro">{questions.length} questions · {mode} · {difficulty}</p><div className="questions-results-list">{questions.map((question, index) => <div key={question.id}><strong>{index + 1}. {question.text}</strong><span>{question.category} · {question.difficulty}</span></div>)}</div><div className="actions"><button onClick={onAgain}>New session</button></div></section> }
 function Questions() { const [mode, setMode] = useState<QuestionMode>('Mixed'); const [difficulty, setDifficulty] = useState<QuestionDifficulty | 'Mixed'>('Mixed'); const [count, setCount] = useState('10'); const [error, setError] = useState(''); const [status, setStatus] = useState<'setup' | 'playing' | 'results'>('setup'); const [session, setSession] = useState<InterviewQuestion[]>([]); const [index, setIndex] = useState(0); const [revealed, setRevealed] = useState(false); const current = session[index];
   function start() { const requested = Number(count); const available = filterQuestions(mode, difficulty).length; if (!Number.isInteger(requested) || requested < 1 || requested > available) { setError(`Enter an integer from 1 to ${available}.`); return } const selected = selectQuestions(mode, difficulty, requested); setSession(selected); setIndex(0); setRevealed(false); setError(''); setStatus('playing') }
@@ -436,4 +448,4 @@ function GameSession({ name, difficulty, question, index, total, remaining, answ
   return <section className={`page ${sessionClassName}`}><div className="game-top"><div><p className="eyebrow">{name.toUpperCase()} / {difficulty.toUpperCase()}</p><h1>Stay sharp.</h1></div><div className="timer" role="timer" aria-live="off" aria-label={`${Math.ceil(remaining / 1000)} seconds remaining`}>{Math.floor(remaining / 60_000)}:{String(Math.ceil(remaining / 1000) % 60).padStart(2, '0')}</div></div><div className="question-panel"><p className="progress">Question {index + 1} <span>/ {total}</span></p>{questionHint && <p className="precision-hint">{questionHint}</p>}{question && <div className={questionClassName} role="status" aria-live="polite" aria-atomic="true">{question}</div>}{feedback && <Feedback feedback={feedback} />}<form onSubmit={event => { event.preventDefault(); onSubmit() }}><label htmlFor={`${name}-answer`}>Your answer</label><div className={feedback ? `answer-row feedback-${feedback.correct ? 'correct' : 'incorrect'}` : 'answer-row'}><input ref={inputRef} id={`${name}-answer`} inputMode={integer ? 'numeric' : 'decimal'} pattern={integer ? '[+-]?\\d*' : undefined} aria-describedby={describedBy} aria-invalid={Boolean(inputError)} autoComplete="off" disabled={Boolean(feedback)} value={answer} onChange={event => onAnswer(event.target.value)} placeholder={inputPlaceholder ?? (integer ? 'Type an integer' : 'Type your answer')} /><button type="submit" disabled={Boolean(feedback)}>Submit <span>↵</span></button></div>{inputError && <small id={describedBy} className="input-error" role="alert">{inputError}</small>}</form></div></section>
 }
 
-export default function App() { return <Routes><Route element={<Layout />}><Route path="/" element={<Home />} /><Route path="/logic-and-math-games" element={<LogicGames />} /><Route path="/logic-and-math-games/quick-math" element={<QuickMath />} /><Route path="/logic-and-math-games/sequences" element={<Sequences />} /><Route path="/logic-and-math-games/radix-rush" element={<RadixRush />} /><Route path="/logic-and-math-games/tape-recall" element={<TapeRecall />} /><Route path="/logic-and-math-games/foldsight" element={<FoldSight />} /><Route path="/logic-and-math-games/magnitude-forge" element={<MagnitudeForge />} /><Route path="/market-games" element={<MarketGames />} /><Route path="/market-games/hidden-spread" element={<HiddenSpread />} /><Route path="/market-games/basket-edge" element={<BasketEdge />} /><Route path="/market-games/venue-gap" element={<VenueGap />} /><Route path="/market-games/delta-shield" element={<DeltaShield />} /><Route path="/open-questions" element={<Questions />} /><Route path="/statistics" element={<Statistics />} /><Route path="/statistics/:gameId" element={<Statistics />} /></Route></Routes> }
+export default function App() { return <Routes><Route element={<Layout />}><Route path="/" element={<Home />} /><Route path="/logic-and-math-games" element={<LogicGames />} /><Route path="/logic-and-math-games/quick-math" element={<QuickMath />} /><Route path="/logic-and-math-games/sequences" element={<Sequences />} /><Route path="/logic-and-math-games/radix-rush" element={<RadixRush />} /><Route path="/logic-and-math-games/tape-recall" element={<TapeRecall />} /><Route path="/logic-and-math-games/foldsight" element={<FoldSight />} /><Route path="/logic-and-math-games/magnitude-forge" element={<MagnitudeForge />} /><Route path="/market-games" element={<MarketGames />} /><Route path="/market-games/hidden-spread" element={<HiddenSpread />} /><Route path="/market-games/basket-edge" element={<BasketEdge />} /><Route path="/market-games/venue-gap" element={<VenueGap />} /><Route path="/market-games/delta-shield" element={<DeltaShield />} /><Route path="/open-questions" element={<Questions />} /><Route path="/guide" element={<Guide />} /><Route path="/statistics" element={<Statistics />} /><Route path="/statistics/:gameId" element={<Statistics />} /></Route></Routes> }
