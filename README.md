@@ -40,7 +40,7 @@ It provides short practice sessions for quantitative reasoning, logic, memory, v
 
 ## Design continuity
 
-QuantaPit continues the visual language of `giacomo-portfolio` with its own palette: a dark plum canvas (`#24182f`), warm ivory text (`#fff1dd`), peach actions (`#f4b183`), sage accents (`#a5cdb0`), lavender details, and rounded panels. Botanical engravings, contour lines, and small celestial details enrich the page edges without intercepting input; they are quieter during games. Syne headings and Fraunces reading text are self-hosted; arithmetic, quotes, clocks, and performance data retain monospaced numerals. No external font service is used.
+QuantaPit continues the visual language of `giacomo-portfolio` with its own palette: a dark plum canvas (`#24182f`), warm ivory text (`#fff1dd`), peach actions (`#f4b183`), sage accents (`#a5cdb0`), lavender details, and rounded panels. Botanical engravings, contour lines, and small celestial details enrich the page edges without intercepting input; they are quieter during games. Syne headings are self-hosted; reading text uses HanPit's system sans-serif stack, while arithmetic, quotes, clocks, and performance data retain monospaced numerals. No external font service is used.
 
 The redesign covers navigation, catalogues, every game's setup/live/results screens, interview practice, statistics, and local-history transfer. Existing routes, rules, timers, configurable limits, scoring, and IndexedDB records are unchanged. Positive and negative feedback stay visually distinct; keyboard focus, disabled states, and reduced-motion preferences are supported.
 
