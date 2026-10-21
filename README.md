@@ -45,6 +45,8 @@ Verified on an Android 16/API 36 emulator with WebView 133 in airplane mode: all
 
 Development-tool dependency advisories found during verification are tracked separately in [issue #13](https://github.com/ManfuG/QuantaPit/issues/13); those packages are not present in the emitted browser runtime inventory.
 
+[Android 1.0.1 release](https://github.com/ManfuG/QuantaPit/releases/tag/v1.0.1) · [Passing source CI](https://github.com/ManfuG/QuantaPit/actions/runs/39584011850) · [Passing signed APK workflow](https://github.com/ManfuG/QuantaPit/actions/runs/39584153706). The release includes `SHA256SUMS` and public signing-certificate details; the published APK was downloaded, verified and installed over the exercised local release with session contents preserved.
+
 ## Features
 
 - Logic and quantitative games:
