@@ -2,7 +2,7 @@
   "name": "quantapit",
   "description": "Local-first quantitative and market interview training platform.",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "engines": {
     "node": "^22.22.2 || ^24.15.0 || >=26.0.0"

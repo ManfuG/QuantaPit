@@ -22,6 +22,8 @@ Android opens with the portfolio's orbital/botanical scene, branded **QuantaPit*
 
 Portrait game screens use compact layouts for prompts, timers, market data and actions. Long interview answers and round history can scroll within their content areas. Short landscape windows and enlarged accessibility text retain scrolling rather than clipping essential information. The hosted website keeps its existing layout.
 
+Numeric game answers open a numeric keyboard on Android; Quick Math and Sequences retain signed-number entry. Home refers to app storage and includes a Guide card directly below Statistics.
+
 Completed sessions remain in app-private IndexedDB, separate from the website. In **Statistics**, Export sessions uses Android's system save picker; Import sessions accepts the same JSON backups as the web app and adds sessions without replacing existing history. Choose local storage for offline backups. Android cloud backup/device transfer is disabled; uninstalling the app or clearing its storage deletes its local history. Install same-key updates over the existing app to preserve it.
 
 ### Build Android
@@ -45,7 +47,7 @@ Verified on an Android 16/API 36 emulator with WebView 133 in airplane mode: all
 
 Development-tool dependency advisories found during verification are tracked separately in [issue #13](https://github.com/ManfuG/QuantaPit/issues/13); those packages are not present in the emitted browser runtime inventory.
 
-[Android 1.0.1 release](https://github.com/ManfuG/QuantaPit/releases/tag/v1.0.1) · [Passing source CI](https://github.com/ManfuG/QuantaPit/actions/runs/39584011850) · [Passing signed APK workflow](https://github.com/ManfuG/QuantaPit/actions/runs/39584153706). The release includes `SHA256SUMS` and public signing-certificate details; the published APK was downloaded, verified and installed over the exercised local release with session contents preserved.
+[Android 1.0.2 release](https://github.com/ManfuG/QuantaPit/releases/tag/v1.0.2) includes numeric-keyboard and Home/Guide fixes. This small update was verified with the TypeScript/Vite/signed APK build and one focused Android smoke covering Home wording, Guide placement/navigation, numeric keyboards and signed-decimal submission; the full test suite was not rerun. The release includes `SHA256SUMS` and public signing-certificate details. Install over the existing app to preserve history.
 
 ## Features
 

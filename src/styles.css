@@ -203,6 +203,7 @@ nav { min-width: 0; display: flex; flex-wrap: wrap; justify-content: flex-end; g
 .orbit-eclipse { fill: var(--accent); opacity: .70; }
 .card-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 .hero .card-grid { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--line); }
+.feature-card[href$="/guide"] { grid-column: -2 / -1; }
 .feature-card, .game-card {
   position: relative;
   min-width: 0;
