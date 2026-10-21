@@ -1,6 +1,8 @@
 import { useId, useRef, useState, type ChangeEvent } from 'react'
 import { exportPerformanceData, importPerformanceData } from './backup'
 import { performanceRepository } from './repository'
+import { exportSessionFile } from '../platform'
+import { Capacitor } from '@capacitor/core'
 import './SessionTransfer.css'
 
 export function SessionTransfer({ onImported }: { onImported: () => void }) {
@@ -18,21 +20,14 @@ export function SessionTransfer({ onImported }: { onImported: () => void }) {
     setError('')
     try {
       const text = await exportPerformanceData(performanceRepository())
-      const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }))
-      const link = document.createElement('a')
-      try {
-        link.href = url
-        link.download = `quantapit-sessions-${new Date().toISOString().replace(/[:.]/g, '-')}.json`
-        document.body.appendChild(link)
-        link.click()
-      } finally {
-        link.remove()
-        // Let the browser start consuming the download before releasing its URL.
-        window.setTimeout(() => URL.revokeObjectURL(url), 0)
+      const saved = await exportSessionFile(text)
+      if (saved) {
+        setStatus(Capacitor.getPlatform() === 'android'
+          ? 'Session backup saved. Keep the JSON file to restore it on another browser or device.'
+          : 'Session backup download started. Keep the JSON file to restore it on another browser or device.')
       }
-      setStatus('Session backup download started. Keep the JSON file to restore it on another browser or device.')
     } catch (cause) {
-      setError(`Export failed. ${cause instanceof Error ? cause.message : 'The local session backup could not be downloaded.'}`)
+      setError(`Export failed. ${cause instanceof Error ? cause.message : 'The local session backup could not be saved.'}`)
     } finally {
       busy.current = false
       setAction(null)
@@ -70,7 +65,7 @@ export function SessionTransfer({ onImported }: { onImported: () => void }) {
 
   return <section className="session-transfer" aria-labelledby={`${id}-title`}>
     <h2 id={`${id}-title`}>Session backup</h2>
-    <p id={`${id}-help`} className="session-transfer-help">Download completed sessions and their items as JSON, then import the file on another browser or device. Everything stays local; no account or upload is needed. Imports add sessions without replacing existing data. Identical duplicates are skipped; invalid or incompatible files and conflicting session IDs are rejected without changes.</p>
+    <p id={`${id}-help`} className="session-transfer-help">Save completed sessions and their items as JSON, then import the file on another browser or device. Everything stays local; no account or upload is needed. Imports add sessions without replacing existing data. Identical duplicates are skipped; invalid or incompatible files and conflicting session IDs are rejected without changes.</p>
     <div className="session-transfer-controls" aria-busy={action !== null}>
       <button type="button" disabled={action !== null} onClick={() => void exportSessions()}>{action === 'export' ? 'Exporting sessions…' : 'Export sessions'}</button>
       <div className="session-transfer-file">

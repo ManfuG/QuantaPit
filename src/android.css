@@ -1,0 +1,229 @@
+/* Android consumes system and keyboard insets in the native WebView. */
+html.android #root { zoom: 1; min-height: 100dvh; }
+html.android body { min-width: 0; }
+html.android .page { min-width: 0; padding: 24px 12px 32px; }
+html.android .site-header {
+  margin: 0;
+  padding: 3px 8px;
+  min-height: 52px;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  border-radius: 0;
+}
+html.android .site-header .brand { font-size: 1rem; gap: 4px; }
+html.android .site-header .brand-dot { width: 6px; height: 6px; flex-basis: 6px; }
+html.android .site-header nav {
+  flex: 1;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  gap: 2px;
+}
+html.android .site-header .nav-link {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 6px 8px;
+  font-size: .75rem;
+  white-space: nowrap;
+}
+html.android .site-footer { margin: 0 12px; padding: 16px 0; gap: 12px; }
+html.android .site-footer > a:last-child { min-height: 44px; display: inline-flex; align-items: center; }
+html.android #root:has(.game-page, .page[class*="-session"]) .site-footer { display: none; }
+html.android #root:has(.game-page, .page[class*="-session"]) .page-ornaments { display: none; }
+
+/* Intrinsic minimum sizes deliberately allow document scrolling at enlarged text
+   sizes and with the IME open; no gameplay content is clipped to the viewport. */
+html.android .page:is(.game-page, .recall-session, .foldsight-session, .magnitude-session, .hidden-spread-session, .basket-edge-session, .venue-gap-session, .delta-shield-session, .questions-session) {
+  min-height: calc(100dvh - 52px);
+  padding: 8px 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: visible;
+}
+html.android :is(.game-top, .recall-top, .foldsight-top, .magnitude-top, .hidden-top, .basket-edge-top, .venue-gap-top, .delta-shield-top, .questions-session-top) {
+  align-items: flex-start;
+  gap: 8px;
+  flex-shrink: 0;
+}
+html.android :is(.game-page, .page[class*="-session"]) .eyebrow {
+  margin: 0 0 4px;
+  font-size: .65rem;
+  letter-spacing: .06em;
+}
+html.android .game-top h1 { font-size: 1.4rem; line-height: 1.15; margin: 0; }
+html.android .timer { padding: 7px 9px; font-size: 1.05rem; }
+html.android :is(.progress, .recall-state, .foldsight-progress, .magnitude-progress, .hidden-progress, .basket-edge-progress, .venue-gap-progress, .delta-shield-progress) { margin: 0; font-size: .75rem; line-height: 1.4; }
+html.android :is(.foldsight-progress, .magnitude-progress, .hidden-progress, .basket-edge-progress, .venue-gap-progress, .delta-shield-progress) strong { font-size: .9rem; }
+html.android :is(.basket-edge-top, .venue-gap-top, .delta-shield-top) > div:last-child { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+html.android :is(.basket-edge-budget, .venue-gap-budget, .delta-shield-budget) { margin: 0; font-size: .7rem; }
+html.android :is(.game-page, .page[class*="-session"]) :is(input, select) {
+  min-width: 0;
+  max-width: 100%;
+  min-height: 44px;
+  padding: 8px;
+  font-size: 1rem;
+  scroll-margin-block: 12px;
+}
+html.android :is(.game-page, .page[class*="-session"]) button {
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px 10px;
+  white-space: normal;
+  line-height: 1.25;
+}
+html.android :is(.game-page, .page[class*="-session"]) .input-error { margin: 4px 0 0; font-size: .75rem; overflow-wrap: anywhere; }
+
+/* Quick Math, Sequences, Radix Rush and Tape Recall answers. */
+html.android .game-page .question-panel {
+  flex: 1 0 auto;
+  width: min(100%, 700px);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+}
+html.android .game-page .question { margin: 4px 0 12px; font-size: clamp(1.8rem, 9vw, 3.5rem); letter-spacing: -.05em; overflow-wrap: anywhere; }
+html.android .game-page .sequence-question { font-family: var(--mono-font); font-size: clamp(1.05rem, 4.6vw, 1.8rem); line-height: 1.6; letter-spacing: -.06em; white-space: normal; overflow-wrap: anywhere; }
+html.android .game-page .precision-hint { margin: 0; font-size: .8rem; }
+html.android .game-page .question-panel form { width: 100%; margin: 0; }
+html.android .question-panel label { margin-bottom: 4px; }
+html.android .answer-row { flex-direction: row; align-items: stretch; gap: 6px; }
+html.android .answer-row input { width: 0; }
+html.android .answer-row button { width: auto; flex: 0 0 auto; font-size: .85rem; }
+html.android .answer-row button span { margin-left: 4px; }
+html.android .recall-display { flex: 1 0 160px; font-size: clamp(6rem, 25vw, 10rem); }
+html.android .recall-state { font-size: 1rem; }
+html.android .recall-progress { margin: 0; }
+
+/* All six faces and all five choices retain their own non-overlapping space. */
+html.android .foldsight-net-wrap { flex: 1 0 auto; padding: 4px 0; }
+html.android .fold-net-grid { width: min(100%, 224px); gap: 2px; }
+html.android .net-face { border-width: 1px; }
+html.android .cube-options { flex: 0 0 auto; width: min(100%, 520px); grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+html.android .cube-options .cube-option { min-height: 100px; padding: 4px; }
+html.android .cube-label { top: 5px; left: 6px; font-size: .7rem; }
+html.android .cube-scene { height: 90px; display: grid; place-items: center; }
+html.android .cube-model, html.android .cube-face { width: 40px; height: 40px; }
+html.android .cube-model { margin: 14px 0 0; }
+html.android .cube-top { transform: rotateX(90deg) translateZ(20px); }
+html.android .cube-front { transform: translateZ(20px); }
+html.android .cube-right { transform: rotateY(90deg) translateZ(20px); }
+
+html.android .magnitude-question { flex: 1 0 auto; padding: 12px 0; }
+html.android .magnitude-question p { font-size: clamp(1.1rem, 4.5vw, 1.6rem); line-height: 1.3; margin: 0 0 8px; overflow-wrap: anywhere; }
+html.android .magnitude-question strong { font-size: .7rem; }
+html.android .magnitude-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+html.android .magnitude-fields input { margin-top: 4px; }
+html.android .magnitude-form .answer-row { margin-top: 8px; }
+html.android .magnitude-form .answer-row button { width: 100%; min-width: 0; }
+html.android .magnitude-feedback { margin: 0; }
+
+/* Seven-card hands fit in a row, including the Hard market-maker phase. */
+html.android .hidden-status { flex-direction: column; align-items: flex-end; gap: 3px; }
+html.android .hidden-status > span { padding: 0; font-size: .75rem; }
+html.android .hidden-board { flex: 1 0 auto; gap: 8px; padding: 8px 0; }
+html.android .hidden-cards { width: 100%; gap: 4px; flex-wrap: nowrap; }
+html.android :is(.market-card, .hidden-card) { min-width: 0; width: auto; flex: 0 1 48px; font-size: 1.1rem; }
+html.android .hidden-event { font-size: .72rem; line-height: 1.35; gap: 2px; }
+html.android .hidden-event strong { font-size: .9rem; }
+html.android .hidden-reveal { gap: 4px 12px; font-size: .72rem; overflow-wrap: anywhere; }
+html.android .hidden-trade-panel { padding: 9px; flex-shrink: 0; }
+html.android .hidden-trade-panel .eyebrow { margin-bottom: 4px; }
+html.android .hidden-help { font-size: .75rem; line-height: 1.35; }
+html.android .hidden-quote { gap: 16px; font-size: .9rem; }
+html.android .hidden-controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: end; gap: 6px; margin-top: 8px; }
+html.android .hidden-controls > :is(label, button) { width: 100%; }
+html.android .hidden-controls:not(.trader-controls) > button { grid-column: 1 / -1; }
+html.android .hidden-controls.trader-controls { grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); }
+html.android .hidden-controls input { margin-top: 3px; }
+html.android .side-toggle { width: 100%; min-width: 0; gap: 4px; }
+html.android .side-toggle button { flex: 1; padding: 8px 4px; font-size: .75rem; }
+html.android .hidden-controls > button { padding: 8px 6px; }
+html.android .hidden-trade-result { margin-top: 6px; gap: 4px; max-height: 160px; overflow: auto; overflow-wrap: anywhere; }
+
+html.android .basket-edge-board { flex: 1 0 auto; gap: 10px; padding: 8px 0; }
+html.android .basket-edge-stocks { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+html.android .basket-stock { min-width: 0; padding: 7px 3px; }
+html.android .basket-stock span { font-size: .65rem; margin-bottom: 4px; }
+html.android .basket-stock strong { font-size: 1rem; }
+html.android .basket-quote { gap: 6px; }
+html.android .basket-quote > div { padding: 9px; }
+html.android .basket-quote span { margin-bottom: 4px; }
+html.android .basket-quote strong { font-size: 1.4rem; }
+html.android .basket-edge-controls { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+html.android .basket-edge-controls label { grid-column: 1 / -1; display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 10px; }
+html.android .basket-edge-controls input { margin: 0; }
+html.android .basket-edge-controls :is(label, button) { width: 100%; }
+
+/* Do not inherit the website's hidden quantity/exposure columns. All market
+   depth, fees and per-position risk data remain available on native phones. */
+html.android :is(.venue-gap-board, .delta-shield-board) { flex: 1 0 auto; gap: 6px; padding: 2px 0; }
+html.android .venue-gap-asset { margin: 0; font-size: .7rem; letter-spacing: .04em; }
+html.android :is(.venue-gap-table, .delta-shield-table) { table-layout: fixed; width: 100%; font-size: .72rem; border-spacing: 0 2px; line-height: 1.25; }
+html.android :is(.venue-gap-table, .delta-shield-table) :is(th, td) { padding: 4px 3px; overflow-wrap: anywhere; }
+html.android :is(.venue-gap-table, .delta-shield-table) th { font-size: .65rem; }
+html.android :is(.venue-gap-table, .delta-shield-table) b { font-size: inherit; }
+html.android .venue-gap-table th:nth-child(4), html.android .venue-gap-table td:nth-child(4), html.android .delta-shield-table th:nth-child(3), html.android .delta-shield-table td:nth-child(3) { display: table-cell; }
+html.android .venue-gap-table :is(th, td):first-child { width: 20%; }
+html.android .delta-shield-table :is(th, td):first-child { width: 27%; }
+html.android .delta-shield-table td { padding-block: 3px; }
+html.android .delta-shield-shock { padding: 6px; gap: 4px 8px; font-size: .7rem; align-items: center; flex-wrap: wrap; }
+html.android .delta-shield-shock strong { font-size: .9rem; }
+html.android .delta-shield-exposure { font-size: .72rem; gap: 6px; align-items: center; }
+html.android .delta-shield-exposure b { font-size: 1rem; }
+html.android :is(.venue-gap-controls, .delta-shield-hedge) { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+html.android :is(.venue-gap-controls, .delta-shield-hedge) label { min-width: 0; font-size: .72rem; }
+html.android :is(.venue-gap-controls, .delta-shield-hedge) :is(input, select) { margin-top: 3px; }
+html.android .venue-gap-controls label:nth-child(1) { grid-column: 1 / 3; }
+html.android .venue-gap-controls label:nth-child(2) { grid-column: 1 / 3; grid-row: 2; }
+html.android .venue-gap-controls label:nth-child(3) { grid-column: 3; grid-row: 1; }
+html.android .venue-gap-controls > button:not(.skip) { grid-column: 1 / 3; }
+html.android .venue-gap-controls > .skip { grid-column: 3; grid-row: 2 / 4; align-self: stretch; }
+html.android .delta-shield-side { min-width: 0; align-self: end; gap: 3px; }
+html.android .delta-shield-side button { flex: 1; padding: 8px 3px; font-size: .75rem; }
+html.android .delta-shield-hedge { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+html.android .delta-shield-hedge label:nth-child(2) { grid-column: 1 / -1; grid-row: 1; }
+html.android .delta-shield-hedge select { font-size: .875rem; }
+html.android :is(.venue-gap-controls, .delta-shield-hedge) > button { min-width: 0; font-size: .75rem; padding: 8px 5px; }
+html.android :is(.venue-gap-feedback, .delta-shield-feedback) { font-size: .72rem; overflow-wrap: anywhere; }
+
+/* Long prompts and revealed solutions scroll independently of the next control. */
+html.android .questions-session-top .progress { font-size: .72rem; }
+html.android .questions-counter { flex-shrink: 0; padding-top: 0; font-size: .68rem; }
+html.android .questions-card {
+  flex: 1 1 auto;
+  justify-content: flex-start;
+  margin: 8px auto;
+  padding: 2px;
+  min-height: 160px;
+  max-height: max(160px, calc(100dvh - 210px));
+  overflow: auto;
+  overscroll-behavior-y: contain;
+  overflow-wrap: anywhere;
+}
+html.android .questions-card > p { font-size: clamp(1.1rem, 4.7vw, 1.6rem); line-height: 1.4; letter-spacing: -.02em; }
+html.android .questions-answer { margin-top: 14px; padding: 10px; }
+html.android .questions-answer strong { font-size: .9rem; line-height: 1.5; }
+html.android .questions-controls { flex-shrink: 0; }
+html.android .questions-controls button { width: 100%; }
+
+@media (max-height: 600px) {
+  html.android .delta-shield-table { border-spacing: 0; }
+  html.android .delta-shield-table td { padding-block: 2px; }
+}
+
+@media (max-height: 480px) {
+  html.android #root:has(.game-page, .page[class*="-session"]) .site-header { display: none; }
+  html.android .page:is(.game-page, .recall-session, .foldsight-session, .magnitude-session, .hidden-spread-session, .basket-edge-session, .venue-gap-session, .delta-shield-session, .questions-session) { min-height: 100dvh; }
+  html.android .game-page .question-panel { justify-content: flex-start; }
+  html.android .game-page .question { font-size: 1.7rem; margin: 0; }
+  html.android .magnitude-question { padding-block: 4px; }
+  html.android :is(.hidden-board, .basket-edge-board, .venue-gap-board, .delta-shield-board) { justify-content: flex-start; }
+  html.android .foldsight-net-wrap { flex-grow: 0; }
+}

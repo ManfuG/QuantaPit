@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
+      - run: sdkmanager "platforms;android-36" "build-tools;36.0.0"
+      - run: npm ci
+      - run: npm test
+      - run: npm run android:sync
+      - run: ./gradlew testDebugUnitTest lintDebug assembleDebug --no-daemon
+        working-directory: android
+      - run: python3 scripts/check-android.py android/app/build/outputs/apk/debug/app-debug.apk

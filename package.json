@@ -2,7 +2,7 @@
   "name": "quantapit",
   "description": "Local-first quantitative and market interview training platform.",
   "private": true,
-  "version": "0.1.0",
+  "version": "1.0.0",
   "type": "module",
   "engines": {
     "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
@@ -11,9 +11,18 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "test": "vitest run",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "android:sync": "npm run build && cap sync android",
+    "android:build": "npm run android:sync && cd android && ./gradlew assembleRelease"
+  },
+  "overrides": {
+    "xcode": {
+      "uuid": "11.1.1"
+    }
   },
   "dependencies": {
+    "@capacitor/android": "8.5.3",
+    "@capacitor/core": "8.5.3",
     "@vitejs/plugin-react": "latest",
     "react": "latest",
     "react-dom": "latest",
@@ -22,6 +31,8 @@
     "vite": "latest"
   },
   "devDependencies": {
+    "@capacitor/cli": "8.5.3",
+    "@types/node": "^24.19.2",
     "@types/react": "latest",
     "@types/react-dom": "latest",
     "fake-indexeddb": "^6.2.5",

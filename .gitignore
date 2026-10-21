@@ -11,3 +11,8 @@ local-data/
 .env.*
 !.env.example
 QuantaPitVault/
+
+# Android signing material
+*.jks
+*.keystore
+*.p12

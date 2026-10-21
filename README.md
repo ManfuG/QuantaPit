@@ -12,6 +12,39 @@ It provides short practice sessions for quantitative reasoning, logic, memory, v
 
 > **Early-stage notice:** This is the very first version and the first project phase. It is a working prototype, not a production-ready product. There are still many rough edges, incomplete areas, and known issues.
 
+## Android
+
+**[Download QuantaPit for Android](https://github.com/ManfuG/QuantaPit/releases/latest/download/QuantaPit-Android.apk)**
+
+Install the APK on Android **8.0+** with Android System WebView **119+**. Android may ask you to allow installation from your browser or file manager. The app bundles its games, questions, artwork and fonts and works offline from first launch; no account, server or initial download is required.
+
+Android opens with the portfolio's orbital/botanical scene, branded **QuantaPit** in the app's plum, peach and sage palette. Swipe up or activate the arrow to enter Home. The opening appears once per app document, not on ordinary background/resume; motion respects reduced-motion settings and pauses in the background.
+
+Portrait game screens use compact layouts for prompts, timers, market data and actions. Long interview answers and round history can scroll within their content areas. Short landscape windows and enlarged accessibility text retain scrolling rather than clipping essential information. The hosted website keeps its existing layout.
+
+Completed sessions remain in app-private IndexedDB, separate from the website. In **Statistics**, Export sessions uses Android's system save picker; Import sessions accepts the same JSON backups as the web app and adds sessions without replacing existing history. Choose local storage for offline backups. Android cloud backup/device transfer is disabled; uninstalling the app or clearing its storage deletes its local history. Install same-key updates over the existing app to preserve it.
+
+### Build Android
+
+Use Node **24**, JDK **21**, Android SDK platform **36** and build-tools **36.0.0**. Set `JAVA_HOME` and `ANDROID_HOME`, or configure the SDK in Android Studio.
+
+```sh
+npm ci
+npm run android:sync
+cd android
+./gradlew lintDebug assembleDebug
+```
+
+The debug APK is `android/app/build/outputs/apk/debug/app-debug.apk`. Run `npx cap open android` from the repository root to open Android Studio. `android:sync` rebuilds and bundles the local web app; do not configure a remote `server.url`.
+
+For a signed release, set `QUANTAPIT_KEYSTORE_PATH` (absolute path), `QUANTAPIT_KEYSTORE_PASSWORD`, `QUANTAPIT_KEY_ALIAS` and `QUANTAPIT_KEY_PASSWORD`, then run `npm run android:build`. Missing signing configuration fails rather than producing a debug-signed release. Keep the release key backed up outside Git: a different key cannot update installed copies.
+
+GitHub Actions checks the web tests/build and Android lint/build, including bundled-asset integrity. A `v<package-version>` tag publishes the signed `QuantaPit-Android.apk`, checksums and public signing-certificate fingerprint using encrypted Actions secrets. Increment npm/native versions and native `versionCode` for future releases. This does not publish a Play Store listing or deploy the website.
+
+Verified on an Android 16/API 36 emulator with WebView 133 in airplane mode: all ten games completed, both Hidden Spread roles, interview answer/finish, native backup export/import, process restart and same-key signed updates. Ten sessions and fourteen items survived restore/update with identical exported contents. Portrait layouts were also exercised at 320×740, 360×640 and 390×844; short landscape and 200% text retain access through scrolling. The existing 364 tests, TypeScript/Vite build, Android debug/release lint/build and APK asset-integrity checks passed. Emulator checks do not replace physical-device/OEM testing.
+
+Development-tool dependency advisories found during verification are tracked separately in [issue #13](https://github.com/ManfuG/QuantaPit/issues/13); those packages are not present in the emitted browser runtime inventory.
+
 ## Features
 
 - Logic and quantitative games:
@@ -127,6 +160,20 @@ npm run build
 npm run preview
 ```
 
+### Hosting under a subpath
+
+The router follows Vite’s `BASE_URL`, so QuantaPit can run at `/` or beneath a site prefix without changing game routes. For example:
+
+```bash
+npm run build -- --base /projects/quantapit/
+npm run preview -- --base /projects/quantapit/
+```
+
+The build emits Cloudflare Pages `_redirects` for supported application routes, including trailing slashes, and an `app.html` entry alias. Rewrites target its extensionless `app` URL to avoid Pages' `index.html` rewrite loops and `.html` canonical redirects; asset URLs are not wildcard-rewritten.
+
+The sibling `giacomo-portfolio/` project serves this original checkout at `/projects/quantapit/` during development and builds it into its own output for deployment. Its documented Cloudflare publisher combines both apps, generates full runtime license notices and audits the final static output. Use that publisher for the combined public site; standalone builds also emit `_bundled-packages.json` as the included-library inventory. Source updates are picked up without a duplicate app directory; published static builds must be rebuilt after checkout updates. Browser history is origin-local: export completed sessions before changing host/domain, then import the backup on the new site. The main routes below are relative to the configured base.
+
+
 ## Main routes
 
 - `/` — Home
@@ -235,3 +282,5 @@ Vibe coding accelerated the feedback loop, but changes were kept under human dir
 QuantaPit is released under the [MIT License](./LICENSE). You are free to use, copy, modify, merge, publish, distribute, sublicense, and sell copies of the software, provided that the copyright notice and license text are included in substantial portions of the software.
 
 The software is provided "as is", without warranty of any kind. See [`LICENSE`](./LICENSE) for the complete terms.
+
+Dependencies and assets are not relicensed as project code; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The combined portfolio deployment delivers complete browser-package notices and both font licenses alongside the app.
