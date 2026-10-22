@@ -1,20 +1,27 @@
 # QuantaPit
 
-QuantaPit is a **local-first quantitative and market interview training platform** built with React, TypeScript, Vite, IndexedDB, and Vitest.
+QuantaPit is a local-first Android and browser app for quantitative reasoning, market games and interview practice. Built with React and TypeScript, it stores completed sessions locally with IndexedDB.
 
-[![QuantaPit portfolio-aligned design demo: home, Quick Math, Venue Gap, interview questions, and local statistics](./assets/quantapit-demo.gif)](./assets/quantapit-demo.mp4)
+[![PitVerse](https://img.shields.io/badge/PitVerse-suite-75dbca)](https://giacomo-manfucci.pages.dev/pitverse/)
+[![Release](https://img.shields.io/github/v/release/ManfuG/QuantaPit)](https://github.com/ManfuG/QuantaPit/releases/latest)
 
-**See it in action:** a walkthrough of the plum-coloured home with animated orbits and botanical side ornaments, the game catalogues, a correct Quick Math answer, a profitable Venue Gap trade, an interview question with its answer, and saved-session charts and details. Recorded from the production build at the enlarged default interface scale; all interactions and results come from the running application.
+## Try and download
 
-[View or download the full-resolution video (MP4)](./assets/quantapit-demo.mp4).
+**[Download QuantaPit for Android — QuantaPit-Android.apk](https://github.com/ManfuG/QuantaPit/releases/latest/download/QuantaPit-Android.apk)**
 
-It provides short practice sessions for quantitative reasoning, logic, memory, visual reasoning, market making, arbitrage, portfolio hedging, and open-ended interview questions. Completed sessions are stored locally in the browser and exposed through per-game performance statistics.
+[Try the web demo](https://giacomo-manfucci.pages.dev/projects/quantapit/) · [Latest release and checksums](https://github.com/ManfuG/QuantaPit/releases/latest)
 
-> **Early-stage notice:** This is the very first version and the first project phase. It is a working prototype, not a production-ready product. There are still many rough edges, incomplete areas, and known issues.
+Current release: **[1.0.3](https://github.com/ManfuG/QuantaPit/releases/tag/v1.0.3)** (Android version code 4), with orbital launcher icons and development-tool security fixes. Ten games, interview questions, local statistics and JSON backup transfer are available; there is no account or cloud synchronization. Android bundles offline startup assets; the website needs network access to load initially.
+
+## Demo
+
+[![QuantaPit desktop demo: home, Quick Math, Venue Gap, interview questions and local statistics](./assets/quantapit-demo.gif)](https://github.com/ManfuG/QuantaPit/raw/refs/heads/main/assets/quantapit-demo.mp4)
+
+**[Watch or download the desktop demo (MP4, 46 seconds, no audio)](https://github.com/ManfuG/QuantaPit/raw/refs/heads/main/assets/quantapit-demo.mp4)**
+
+The existing production-build recording remains representative of the web app: Home and game catalogues, a correct Quick Math answer, a profitable Venue Gap trade, an interview answer, and saved-session charts/details at 1440×1000. It predates the Android packaging and latest icon/tooling updates; it does not demonstrate Android-specific entry, keyboards or file pickers.
 
 ## Android
-
-**[Download QuantaPit for Android](https://github.com/ManfuG/QuantaPit/releases/latest/download/QuantaPit-Android.apk)**
 
 Install the APK on Android **8.0+** with Android System WebView **119+**. Android may ask you to allow installation from your browser or file manager. The app bundles its games, questions, artwork and fonts and works offline from first launch; no account, server or initial download is required.
 
@@ -28,7 +35,7 @@ Completed sessions remain in app-private IndexedDB, separate from the website. I
 
 ### Build Android
 
-Use Node **24**, JDK **21**, Android SDK platform **36** and build-tools **36.0.0**. Set `JAVA_HOME` and `ANDROID_HOME`, or configure the SDK in Android Studio.
+Use Node **22.23.4+ (22.x)**, **24.22.1+ (24.x)**, or **26.12.1+ (26.x)**, JDK **21**, Android SDK platform **36** and build-tools **36.0.0**. Set `JAVA_HOME` and `ANDROID_HOME`, or configure the SDK in Android Studio.
 
 ```sh
 npm ci
@@ -43,11 +50,11 @@ For a signed release, set `QUANTAPIT_KEYSTORE_PATH` (absolute path), `QUANTAPIT_
 
 GitHub Actions checks the web tests/build and Android lint/build, including bundled-asset integrity. A `v<package-version>` tag publishes the signed `QuantaPit-Android.apk`, checksums and public signing-certificate fingerprint using encrypted Actions secrets. Increment npm/native versions and native `versionCode` for future releases. This does not publish a Play Store listing or deploy the website.
 
-Verified on an Android 16/API 36 emulator with WebView 133 in airplane mode: all ten games completed, both Hidden Spread roles, interview answer/finish, native backup export/import, process restart and same-key signed updates. Ten sessions and fourteen items survived restore/update with identical exported contents. Portrait layouts were also exercised at 320×740, 360×640 and 390×844; short landscape and 200% text retain access through scrolling. The existing 364 tests, TypeScript/Vite build, Android debug/release lint/build and APK asset-integrity checks passed. Emulator checks do not replace physical-device/OEM testing.
+Historical Android 1.0.1 verification on an Android 16/API 36 emulator with WebView 133 in airplane mode: all ten games completed, both Hidden Spread roles, interview answer/finish, native backup export/import, process restart and same-key signed updates. Ten sessions and fourteen items survived restore/update with identical exported contents. Portrait layouts were also exercised at 320×740, 360×640 and 390×844; short landscape and 200% text retain access through scrolling. The then-existing 364 tests, TypeScript/Vite build, Android debug/release lint/build and APK asset-integrity checks passed. These are historical results, not a new full Android campaign for 1.0.3. Emulator checks do not replace physical-device/OEM testing.
 
-Development-tool dependency advisories found during verification are tracked separately in [issue #13](https://github.com/ManfuG/QuantaPit/issues/13); those packages are not present in the emitted browser runtime inventory.
+The development-tool advisories historically tracked in [issue #13](https://github.com/ManfuG/QuantaPit/issues/13) were resolved in **1.0.3**, and the issue is closed. The current release's scoped verification is recorded below; the earlier advisory inventory is not the current status.
 
-[Android 1.0.2 release](https://github.com/ManfuG/QuantaPit/releases/tag/v1.0.2) includes numeric-keyboard and Home/Guide fixes. This small update was verified with the TypeScript/Vite/signed APK build and one focused Android smoke covering Home wording, Guide placement/navigation, numeric keyboards and signed-decimal submission; the full test suite was not rerun. The release includes `SHA256SUMS` and public signing-certificate details. Install over the existing app to preserve history.
+Historical [Android 1.0.2 release](https://github.com/ManfuG/QuantaPit/releases/tag/v1.0.2): numeric-keyboard and Home/Guide fixes were verified with the TypeScript/Vite/signed APK build and one focused Android smoke covering Home wording, Guide placement/navigation, numeric keyboards and signed-decimal submission; the full test suite was not rerun for that update. Latest release assets include `SHA256SUMS` and public signing-certificate details. Install same-key updates over the existing app to preserve history.
 
 ## Features
 
@@ -137,7 +144,7 @@ npm run dev
 
 Open the URL printed by Vite in Firefox, usually `http://localhost:5173`. Keep the terminal running; press `Ctrl+C` to stop the server. Do not open `index.html` directly using `file://`, and do not run npm with `sudo`.
 
-Compatibility was verified for [issue #10](https://github.com/ManfuG/QuantaPit/issues/10) on **Ubuntu 26.04.1 LTS x64**, with **Node.js 24.21.0**, **npm 11.19.0**, and **Firefox 156.0.1**:
+Historical compatibility verification for [issue #10](https://github.com/ManfuG/QuantaPit/issues/10) used **Ubuntu 26.04.1 LTS x64**, **Node.js 24.21.0**, **npm 11.19.0**, and **Firefox 156.0.1**. This predates the current patched Node floors; use the versions required above for new installations:
 
 - Clean dependency installation using `npm ci`.
 - The full Vitest suite and the TypeScript/Vite production build.
@@ -175,7 +182,7 @@ npm run preview -- --base /projects/quantapit/
 
 The build emits Cloudflare Pages `_redirects` for supported application routes, including trailing slashes, and an `app.html` entry alias. Rewrites target its extensionless `app` URL to avoid Pages' `index.html` rewrite loops and `.html` canonical redirects; asset URLs are not wildcard-rewritten.
 
-The sibling `giacomo-portfolio/` project serves this original checkout at `/projects/quantapit/` during development and builds it into its own output for deployment. Its documented Cloudflare publisher combines both apps, generates full runtime license notices and audits the final static output. Use that publisher for the combined public site; standalone builds also emit `_bundled-packages.json` as the included-library inventory. Source updates are picked up without a duplicate app directory; published static builds must be rebuilt after checkout updates. Browser history is origin-local: export completed sessions before changing host/domain, then import the backup on the new site. The main routes below are relative to the configured base.
+The sibling `giacomo-portfolio/` project serves this original checkout at `/projects/quantapit/` during development and builds it into its own output for deployment. Its documented Cloudflare publisher combines the suite apps, generates full runtime license notices and audits the final static output. Use that publisher for the combined public site; standalone builds also emit `_bundled-packages.json` as the included-library inventory. Source updates are picked up without a duplicate app directory; published static builds must be rebuilt after checkout updates. Browser history is origin-local: export completed sessions before changing host/domain, then import the backup on the new site. The main routes below are relative to the configured base.
 
 
 ## Main routes
