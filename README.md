@@ -289,6 +289,6 @@ The software is provided "as is", without warranty of any kind. See [`LICENSE`](
 
 Dependencies and assets are not relicensed as project code; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The combined portfolio deployment delivers complete browser-package notices and both font licenses alongside the app.
 
-## 1.0.3 — suite alignment and security
+## [1.0.3](https://github.com/ManfuG/QuantaPit/releases/tag/v1.0.3) — suite alignment and security
 
 Adds NotePit-style tilted orbital favicon and Android launcher variants without changing games, colors or stored history. Targeted Vite, Vitest/mocker, nanoid, source-map-js and undici development-tool fixes resolve [issue #13](https://github.com/ManfuG/QuantaPit/issues/13); Node floors include the [October security releases](https://nodejs.org/en/blog/vulnerability/october-2026-security-releases). Clean install/npm audit reports zero known vulnerabilities. All 364 tests, standalone/embedded builds, signed Android assembly and the 8-source/14-build asset audit passed. Embedded Quick Math and the same-key API 36 update/launcher were exercised. The locally verified APK is published directly, avoiding duplicate hosted CI.
