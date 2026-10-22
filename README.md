@@ -104,9 +104,9 @@ Bundled Syne and Fraunces fonts are licensed under the SIL Open Font License 1.1
 
 ### Requirements
 
-Use **Node.js 24 LTS, version 24.15.0 or newer**, with npm. The locked dependencies also support Node.js 22.22.2+ on the 22.x line, or Node.js 26+. Older Node.js versions do not satisfy the test environment's requirements.
+Use **Node.js 24 LTS, version 24.22.1 or newer on 24.x**, with npm. The locked dependencies also support **22.23.4+ on 22.x** or **26.12.1+ on 26.x**. These floors include the October 2026 security fixes.
 
-The `.nvmrc` file selects Node.js 24. If you use [nvm](https://github.com/nvm-sh/nvm#installing-and-updating), run `nvm install` and `nvm use` from the repository root before installing dependencies.
+The `.nvmrc` file selects Node.js 24.22.1. If you use [nvm](https://github.com/nvm-sh/nvm#installing-and-updating), run `nvm install` and `nvm use` from the repository root before installing dependencies.
 
 ### Install dependencies
 
@@ -288,3 +288,7 @@ QuantaPit is released under the [MIT License](./LICENSE). You are free to use, c
 The software is provided "as is", without warranty of any kind. See [`LICENSE`](./LICENSE) for the complete terms.
 
 Dependencies and assets are not relicensed as project code; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The combined portfolio deployment delivers complete browser-package notices and both font licenses alongside the app.
+
+## 1.0.3 — suite alignment and security
+
+Adds NotePit-style tilted orbital favicon and Android launcher variants without changing games, colors or stored history. Targeted Vite, Vitest/mocker, nanoid, source-map-js and undici development-tool fixes resolve [issue #13](https://github.com/ManfuG/QuantaPit/issues/13); Node floors include the [October security releases](https://nodejs.org/en/blog/vulnerability/october-2026-security-releases). Clean install/npm audit reports zero known vulnerabilities. All 364 tests, standalone/embedded builds, signed Android assembly and the 8-source/14-build asset audit passed. Embedded Quick Math and the same-key API 36 update/launcher were exercised. The locally verified APK is published directly, avoiding duplicate hosted CI.

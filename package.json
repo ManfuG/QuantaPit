@@ -2,10 +2,10 @@
   "name": "quantapit",
   "description": "Local-first quantitative and market interview training platform.",
   "private": true,
-  "version": "1.0.2",
+  "version": "1.0.3",
   "type": "module",
   "engines": {
-    "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
+    "node": "^22.23.4 || ^24.22.1 || ^26.12.1"
   },
   "scripts": {
     "dev": "vite",
@@ -28,7 +28,7 @@
     "react-dom": "latest",
     "react-router-dom": "latest",
     "typescript": "latest",
-    "vite": "latest"
+    "vite": "~8.2.4"
   },
   "devDependencies": {
     "@capacitor/cli": "8.5.3",
@@ -37,6 +37,6 @@
     "@types/react-dom": "latest",
     "fake-indexeddb": "^6.2.5",
     "jsdom": "latest",
-    "vitest": "latest"
+    "vitest": "~4.1.12"
   }
 }
